@@ -54,6 +54,8 @@ Some of the changes are breaking changes and will require changes in the client 
 
 ### `CarbonEmissionFactor` module
 
+- ✅ Export the `CarbonEmissionFactorService` class from the `CarbonEmissionFactor` module:
+  - This will allow to use the service in other modules.
 
 #### `CarbonEmissionFactor` entity
 
@@ -95,6 +97,12 @@ Some of the changes are breaking changes and will require changes in the client 
 
 #### `CarbonEmissionFactorController`
 
+- ✅ Use dedicated logger instance:
+  - This is recommended in the NestJS documentation to avoid conflicts between different controllers.
+  - This is not a breaking change unless parsers are relying on the current log format.
+  - I'm not sure this is the proper way to implement an audit log though. A middleware would be more appropriate.
+  - Logging is not tested. This has been left out due to lack of time, but it should be tested.
+
 - 🚨 Rename `POST /carbon-emission-factors` into `POST /carbon-emission-factors/bulk` endpoint. This is more aligned with REST principles. Moreover, the endpoint no longer returns an array of `CarbonEmissionFactor` entities but an array of `ReadCarbonEmissionFactorDto` data transfer objects instead.
   - The returned dto does not include the `id` field as it is not needed by the client.
 
@@ -118,13 +126,114 @@ Some of the changes are breaking changes and will require changes in the client 
   - The endpoint will return a `201` status code if the entity is create, together with a `ReadCarbonEmissionFactorDto` data transfer object.
   - This is a new feature, it is not a breaking change.
 
-## Breaking changes
+### `FoodProduct` module
 
-- The `POST /carbon-emission-factors` endpoint has been updated to accept a single `CarbonEmissionFactor` object instead of an array of `CarbonEmissionFactor` objects.
+The `FoodProduct` module has been created to handle the CRUD operations for food products.
 
-- The `POST /carbon-emission-factors/bulk` endpoint has been added. If your application used `POST /carbon-emission-factors` endpoint, you will need to update your code to send a request to `POST /carbon-emission-factors/bulk` instead.
+It is completely independent from the `CarbonEmissionFactor` module, and it does not concern itself with concepts such as carbon footprint.
 
-## New Features
+The goal of this module is to provide a controller to:
+
+- Create a food product.
+- Delete a food product.
+
+Update operations are not provided as they are not needed for this exercice.
+
+This module should also export a `FoodProductService` class for the controller to use, and for another module to use (see `FootprintScore` module below).
+
+#### `FoodProduct` entity
+
+- 🎁 Introduce a new entity `FoodProduct`:
+  - This entity has a single field `name`.
+  - It has a relation `composition`.
+    - `composition` is an array of `IngredientQuantity` entities (see below).
+
+- 🎁 Introduce a new entity `Ingredient`:
+  - This entity has a `name` and a `unit`.
+  - `unit` validation is very basic. It should be improved in the future.
+
+- 🎁 Introcuce a new entity `IngredientQuantity`:
+  - This entity will allow to store the quantity of an ingredient in a food product.
+  - This entity has a the fields `ingredient_id`, `product_id` and `quantity`.
+  - It has a relation `ingredient` to the `Ingredient` entity through the `ingredient_id` field.
+  - It has a relation `product` to the `FoodProduct` entity through the `product_id` field.
+
+#### `FoodProductService`
+
+- 🎁 Introduce a new service `FoodProductService`:
+  - This service will allow to create and delete food products.
+  - It will also allow to retrieve a food product by its name.
+
+#### `FoodProductController`
+
+- 🎁 Introduce a new controller `FoodProductController`:
+  - This controller will allow to create and delete food products.
+  - It will also allow to retrieve a food product by its name.
+
+### `FootprintScore` module
+
+The `FootprintScore` module has been created to handle the carbon footprint calculation and storage.
+
+I'm not very confident in the way the module is organized, and I'm not sure if the `FootprintScoreService` class is the right place to handle the calculation. It may be better to have a dedicated class, completely unrelated to either `NestJS` or `TypeORM` for the calculation. I'm not sure what are the best practices in this case.
+
+### Rational
+
+As this module is the most complex one, a dedicated section is provided to explain the choices made.
+
+#### Requirements
+
+This exercice defines the following requirement:
+
+> 3/ Implement a POST endpoint to trigger the calculation and the saving in the database.
+
+I understand this requirement as follows:
+
+1. A user can upload a new food product.
+2. A reply is immediately sent to the user with a `201` status code.
+3. The carbon footprint calculation is triggered in the background.
+4. The result of the calculation is stored in the database.
+5. The result of the calculation can be retrieved by the user using a `GET` endpoint.
+
+#### Solution candidates
+
+Several solutions are possible to solve this problem:
+
+1. **Synchronous calculation**:
+   - The calculation is done synchronously in the controller.
+   - The result is stored in the database.
+   - The result is returned to the user.
+   - This solution is simple but has the drawback of being slow.
+   - The user has to wait for the calculation to be done before getting a reply.
+   - This is not a good user experience.
+   - Mostly, this **violate the implicit requirement** of having the calculation done in the background (if such requirement exists 😅).
+
+2. **Asynchronous calculation**:
+    - Upon sending the created product, the calculation is done asynchronously in the controller.
+    - When calculation is done, the result is stored in the database.
+    - The user can retrieve the result using a `GET` endpoint once the result is stored.
+    - This solution is better as the user does not have to wait for the calculation to be done.
+    - However in case of a server crash, the calculation may be lost, and there is no easy way to recover it.
+
+3. **Asynchronous calculation using a persisted queue**:
+    - Upon sending the created product, the calculation is done asynchronously in the controller.
+    - The calculation is stored in a queue.
+    - A worker is responsible for taking the calculation from the queue and storing the result in the database.
+    - The user can retrieve the result using a `GET` endpoint once the result is stored.
+    - This solution is the best as it ensures that the calculation is not lost in case of a server crash.
+    - However, it is more complex to implement, as default queue integration in `NestJS` relies on `redis`: See https://docs.nestjs.com/techniques/queues
+    - IMO, it also **violates the first requirement of the exercice** which is: `Stack: NestJs + TypeORM + Postgres`. Using `redis` would introduce a new technology in the stack.
+
+4. **Pending inserts in SQL tables and polling**:
+    - Upon creating a product in the SQL table, a trigger is fired and **inserts a row in a `pending_footprint_score` table**.
+    - Every `n` seconds, a worker checks the `pending_footprint_score` table and calculates the carbon footprint for the products that are not yet calculated.
+    - The result is stored in the `footprint_score` table.
+    - The user can retrieve the result using a `GET` endpoint once the result is stored.
+    - This solution is a compromise between the previous two solutions.
+    - It is more complex to implement than the first solution, but it is simpler than the third solution.
+    - It is also **more aligned with the first requirement of the exercice** which is: `Stack: NestJs + TypeORM + Postgres`.
+    - While it may not seem very elegant, this is battle tested, and this is a very easy solution to understand.
+    - `TypeORM` migrations allows defining triggers, so this is transparent to the developer.
+    - This is the solution I have chosen to implement.
 
 ### Developer Tools
 
