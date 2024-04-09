@@ -1,9 +1,11 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
+import { ScheduleModule } from "@nestjs/schedule";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { typeorm } from "../config/dataSource";
 import { CarbonEmissionFactorsModule } from "./carbonEmissionFactor/carbonEmissionFactors.module";
 import { FoodProductsModule } from "./foodProduct/foodProducts.module";
+import { FootprintScoresModule } from "./footprintScore/footprintScores.module";
 
 @Module({
   imports: [
@@ -11,6 +13,7 @@ import { FoodProductsModule } from "./foodProduct/foodProducts.module";
       isGlobal: true,
       load: [typeorm],
     }),
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) =>
@@ -18,6 +21,7 @@ import { FoodProductsModule } from "./foodProduct/foodProducts.module";
     }),
     CarbonEmissionFactorsModule,
     FoodProductsModule,
+    FootprintScoresModule,
   ],
 })
 export class AppModule {}
