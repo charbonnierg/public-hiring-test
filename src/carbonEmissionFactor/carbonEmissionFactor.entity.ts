@@ -1,19 +1,32 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+} from "typeorm";
+
+export const Units = ["kg", "oz"] as const;
+
+export type UnitT = (typeof Units)[number];
 
 @Entity("carbon_emission_factors")
+@Index(["name"], { unique: true })
 export class CarbonEmissionFactor extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({
+    type: "varchar",
     nullable: false,
   })
   name: string;
 
   @Column({
+    type: "varchar",
     nullable: false,
   })
-  unit: string;
+  unit: UnitT;
 
   @Column({
     type: "float",
@@ -22,28 +35,8 @@ export class CarbonEmissionFactor extends BaseEntity {
   emissionCO2eInKgPerUnit: number;
 
   @Column({
+    type: "varchar",
     nullable: false,
   })
   source: string;
-
-  sanitize() {
-    if (this.source === "") {
-      throw new Error("Source cannot be empty");
-    }
-  }
-
-  constructor(props: {
-    name: string;
-    unit: string;
-    emissionCO2eInKgPerUnit: number;
-    source: string;
-  }) {
-    super();
-
-    this.name = props?.name;
-    this.unit = props?.unit;
-    this.emissionCO2eInKgPerUnit = props?.emissionCO2eInKgPerUnit;
-    this.source = props?.source;
-    this.sanitize();
-  }
 }

@@ -8,7 +8,7 @@ dotenvConfig({ path: ".env" });
 const dataSourceOptions: DataSourceOptions = {
   type: "postgres",
   port: parseInt(
-    `${process.env.NODE_ENV === "test" ? process.env.DATABASE_TEST_PORT : process.env.DATABASE_PORT}`
+    `${process.env.NODE_ENV === "test" ? process.env.DATABASE_TEST_PORT : process.env.DATABASE_PORT}`,
   ),
   username: process.env.DATABASE_USERNAME,
   password: process.env.DATABASE_PASSWORD,

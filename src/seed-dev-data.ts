@@ -1,5 +1,7 @@
+import { plainToClass } from "class-transformer";
 import { dataSource } from "../config/dataSource";
 import { CarbonEmissionFactor } from "./carbonEmissionFactor/carbonEmissionFactor.entity";
+import { CreateCarbonEmissionFactorDto } from "./carbonEmissionFactor/dto/create-carbonEmissionFactor.dto";
 
 export const TEST_CARBON_EMISSION_FACTORS = [
   {
@@ -50,22 +52,15 @@ export const TEST_CARBON_EMISSION_FACTORS = [
     emissionCO2eInKgPerUnit: 0.15,
     source: "Agrybalise",
   },
-].map((args) => {
-  return new CarbonEmissionFactor({
-    name: args.name,
-    unit: args.unit,
-    emissionCO2eInKgPerUnit: args.emissionCO2eInKgPerUnit,
-    source: args.source,
-  });
-});
+].map((ef) => plainToClass(CreateCarbonEmissionFactorDto, ef).toEntity());
 
 export const getTestEmissionFactor = (name: string) => {
   const emissionFactor = TEST_CARBON_EMISSION_FACTORS.find(
-    (ef) => ef.name === name
+    (ef) => ef.name === name,
   );
   if (!emissionFactor) {
     throw new Error(
-      `test emission factor with name ${name} could not be found`
+      `test emission factor with name ${name} could not be found`,
     );
   }
   return emissionFactor;
@@ -75,10 +70,9 @@ export const seedTestCarbonEmissionFactors = async () => {
   if (!dataSource.isInitialized) {
     await dataSource.initialize();
   }
-  const carbonEmissionFactorsService =
-    dataSource.getRepository(CarbonEmissionFactor);
+  const factorsRepository = dataSource.getRepository(CarbonEmissionFactor);
 
-  await carbonEmissionFactorsService.save(TEST_CARBON_EMISSION_FACTORS);
+  await factorsRepository.save(TEST_CARBON_EMISSION_FACTORS);
 };
 
 if (require.main === module) {
