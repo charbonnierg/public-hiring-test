@@ -3,22 +3,15 @@ import { Repository } from "typeorm";
 import { dataSource, GreenlyDataSource } from "../../config/dataSource";
 import { getTestEmissionFactor } from "../seed-dev-data";
 import { CarbonEmissionFactor } from "./carbonEmissionFactor.entity";
+import { CarbonEmissionFactorsRepository } from "./carbonEmissionFactors.repository";
 import { CarbonEmissionFactorsService } from "./carbonEmissionFactors.service";
 
 const flourEmissionFactor = getTestEmissionFactor("flour");
 const hamEmissionFactor = getTestEmissionFactor("ham");
 const olivedOilEmissionFactor = getTestEmissionFactor("oliveOil");
-let repository: Repository<CarbonEmissionFactor>;
-let service: CarbonEmissionFactorsService;
 
 beforeAll(async () => {
   await dataSource.initialize();
-  repository = dataSource.getRepository(CarbonEmissionFactor);
-  service = new CarbonEmissionFactorsService(repository);
-});
-
-beforeEach(async () => {
-  await GreenlyDataSource.cleanDatabase();
 });
 
 afterAll(async () => {
@@ -26,6 +19,16 @@ afterAll(async () => {
 });
 
 describe("CarbonEmissionFactors.service", () => {
+  let repository: Repository<CarbonEmissionFactor>;
+  let service: CarbonEmissionFactorsService;
+  beforeEach(async () => {
+    repository = dataSource.getRepository(CarbonEmissionFactor);
+    const carbonEmissionFactorsRepository = new CarbonEmissionFactorsRepository(
+      repository,
+    );
+    service = new CarbonEmissionFactorsService(carbonEmissionFactorsRepository);
+    await GreenlyDataSource.cleanDatabase();
+  });
   it("should save a new emission factor", async () => {
     const factor = await service.save(olivedOilEmissionFactor);
     expect(instanceToPlain(factor)).toMatchObject(

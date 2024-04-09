@@ -1,7 +1,7 @@
-import { Injectable } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { In, Repository } from "typeorm";
+import { Inject, Injectable } from "@nestjs/common";
 import { CarbonEmissionFactor } from "./carbonEmissionFactor.entity";
+import { CarbonEmissionFactorsRepository } from "./carbonEmissionFactors.repository";
+import { ICarbonEmissionFactorsRepository } from "./interface/carbonEmissionFactors.repository";
 import { ICarbonEmissionFactorService } from "./interface/carbonEmissionFactors.service";
 
 /**
@@ -12,8 +12,8 @@ export class CarbonEmissionFactorsService
   implements ICarbonEmissionFactorService
 {
   constructor(
-    @InjectRepository(CarbonEmissionFactor)
-    private carbonEmissionFactorRepository: Repository<CarbonEmissionFactor>,
+    @Inject(CarbonEmissionFactorsRepository)
+    private carbonEmissionFactorRepository: ICarbonEmissionFactorsRepository,
   ) {}
 
   /**
@@ -23,9 +23,7 @@ export class CarbonEmissionFactorsService
    * @returns The carbon emission factor if found, null otherwise.
    */
   findByName(query: { name: string }): Promise<CarbonEmissionFactor | null> {
-    return this.carbonEmissionFactorRepository.findOne({
-      where: { name: query.name },
-    });
+    return this.carbonEmissionFactorRepository.findOne(query.name);
   }
 
   /**
@@ -37,9 +35,7 @@ export class CarbonEmissionFactorsService
   async findListByNames(query: {
     names: string[];
   }): Promise<CarbonEmissionFactor[] | null> {
-    const factors = await this.carbonEmissionFactorRepository.findBy({
-      name: In(query.names),
-    });
+    const factors = await this.carbonEmissionFactorRepository.find(query.names);
     if (factors.length !== query.names.length) {
       return null;
     }
@@ -65,7 +61,7 @@ export class CarbonEmissionFactorsService
     carbonEmissionFactor: CarbonEmissionFactor,
   ): Promise<CarbonEmissionFactor> {
     const result =
-      this.carbonEmissionFactorRepository.save(carbonEmissionFactor);
+      this.carbonEmissionFactorRepository.saveOne(carbonEmissionFactor);
     if (!result) {
       throw new Error("CarbonEmissionFactor not created");
     }
@@ -81,7 +77,7 @@ export class CarbonEmissionFactorsService
   async saveBulk(
     carbonEmissionFactors: CarbonEmissionFactor[],
   ): Promise<CarbonEmissionFactor[]> {
-    const result = this.carbonEmissionFactorRepository.save(
+    const result = this.carbonEmissionFactorRepository.saveMany(
       carbonEmissionFactors,
     );
     if (!result) {
@@ -96,12 +92,7 @@ export class CarbonEmissionFactorsService
    * @param query An object with a field `name` to search for.
    * @returns `true` if the carbon emission factor was deleted, `false` otherwise.
    */
-  async deleteByName(query: { name: string }): Promise<boolean> {
-    const result = await this.carbonEmissionFactorRepository.delete({
-      name: query.name,
-    });
-    // Postgres supports this
-    const affectedRows = result.affected as number;
-    return affectedRows > 0;
+  deleteByName(query: { name: string }): Promise<boolean> {
+    return this.carbonEmissionFactorRepository.deleteOne(query.name);
   }
 }
