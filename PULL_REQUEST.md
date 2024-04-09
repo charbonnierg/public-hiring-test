@@ -366,6 +366,16 @@ With this, the system would be more robust and would handle errors more graceful
 
 Run `yarn docs` and open the `http://localhost:8080` to see the documentation for each module.
 
+## About testing
+
+The tests are not complete, and the e2e tests are not complete either.
+
+The philosophy behind the tests is to test the happy path, and to test the most important features of the application.
+
+Efforts have been made to avoid relying on implementation details in the tests, and to test the public API of the application. IMO, at the initial stage of a project, it is more important to have a good coverage of the public API than to have a good coverage of the implementation details.
+
+One major downside is that tests rely on a lot on infrastructure. Developers more experienced with TypeORM may be able to provide a better testing strategy.
+
 ## Further work
 
 The following tasks are still pending:
