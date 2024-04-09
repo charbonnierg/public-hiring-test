@@ -166,6 +166,10 @@ This module should also export a `FoodProductService` class for the controller t
 
 ##### Limitations
 
+###### Exception handling
+
+- The `FoodProductService` does not handle exceptions throwned by `TypeORM`. I'm not sure what is the best way to handle exceptions in a service. I don't think we should throw HTTP exceptions, so maybe we should create our custom exception classes and throw them. The controllers would then be responsible for catching these exceptions and returning the appropriate HTTP status code. 
+
 ###### Units conversion
 
 - When asking to create a product with an ingredient expressed in a different unit than an existing product with same ingredient, the application will crash with a `500` status code. This is due to the fact that the application does not handle units conversion properly, and will try to create a new ingredient with the same name but a different unit, and there is a unique constraint on the `name` field in the `Ingredient` entity.
