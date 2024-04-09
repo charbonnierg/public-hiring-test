@@ -164,6 +164,14 @@ This module should also export a `FoodProductService` class for the controller t
   - This service will allow to create and delete food products.
   - It will also allow to retrieve a food product by its name.
 
+##### Limitations
+
+###### Units conversion
+
+- When asking to create a product with an ingredient expressed in a different unit than an existing product with same ingredient, the application will crash with a `500` status code. This is due to the fact that the application does not handle units conversion properly, and will try to create a new ingredient with the same name but a different unit, and there is a unique constraint on the `name` field in the `Ingredient` entity.
+
+  - This is intentionally left out as I'm not sure whether the units should exist in the database schema, e.g, why not a column `quantityInKg` ? If for any reason we must store the unit in database, then we should have a function to convert the quantity of an ingredient in the unit of the ingredient in the database, and tests for that too.
+
 #### `FoodProductController`
 
 - 🎁 Introduce a new controller `FoodProductController`:
