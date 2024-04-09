@@ -166,6 +166,10 @@ This module should also export a `FoodProductService` class for the controller t
 
 ##### Limitations
 
+###### Unit testing
+
+- At the moment, the service is not really "unit tested" in a sense that it depends on the `TypeORM` repository. This is not a good practice IMO, but I'm not sure what are the best practices here.
+
 ###### Exception handling
 
 - The `FoodProductService` does not handle exceptions throwned by `TypeORM`. I'm not sure what is the best way to handle exceptions in a service. I don't think we should throw HTTP exceptions, so maybe we should create our custom exception classes and throw them. The controllers would then be responsible for catching these exceptions and returning the appropriate HTTP status code. 
