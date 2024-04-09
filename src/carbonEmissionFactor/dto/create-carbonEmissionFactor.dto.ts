@@ -14,6 +14,9 @@ import {
   Units,
 } from "../carbonEmissionFactor.entity";
 
+/**
+ * Data transfer object for creating a carbon emission factor.
+ */
 export class CreateCarbonEmissionFactorDto {
   @IsString()
   @MinLength(2)

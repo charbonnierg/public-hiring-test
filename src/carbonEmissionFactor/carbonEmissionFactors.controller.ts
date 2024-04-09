@@ -23,6 +23,17 @@ import { CarbonEmissionFactorsService } from "./carbonEmissionFactors.service";
 import { CreateCarbonEmissionFactorDto } from "./dto/create-carbonEmissionFactor.dto";
 import { ReadCarbonEmissionFactorDto } from "./dto/read-carbonEmissionFactor.dto";
 
+/**
+ * HTTP Controller for managing carbon emission factors.
+ *
+ * This controller provides endpoints for reading, creating, and deleting
+ * carbon emission factors.
+ *
+ * It also provide endpoints for bulk inserting and bulk reading carbon emission factors.
+ *
+ * @note: This controller may benefit from a logger middleware instead of calling the logger in each method.
+ * @note: Authentication should be added to the controller methods.
+ */
 @ApiTags("carbon-emission-factor")
 @Controller("carbon-emission-factors")
 export class CarbonEmissionFactorsController {

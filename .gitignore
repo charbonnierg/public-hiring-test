@@ -5,3 +5,4 @@ src/coverage
 !.vscode/settings.default.json
 !.vscode/extensions.json
 !.vscode/launch.json
+/documentation

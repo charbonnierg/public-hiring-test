@@ -3,6 +3,9 @@ import { Exclude, Expose, plainToInstance } from "class-transformer";
 import { IsNumber, IsString } from "class-validator";
 import { CarbonEmissionFactor } from "../carbonEmissionFactor.entity";
 
+/**
+ * Data transfer object for reading a carbon emission factor.
+ */
 @Exclude()
 export class ReadCarbonEmissionFactorDto {
   @Expose()

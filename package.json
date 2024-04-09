@@ -23,7 +23,8 @@
     "typeorm": "ts-node ./node_modules/typeorm/cli -d ./config/dataSource.ts",
     "migration:run": "yarn build && yarn typeorm migration:run",
     "migration:generate": "yarn build && yarn typeorm -- migration:generate ./migrations/$migrationName",
-    "seed": "ts-node ./src/seed-dev-data.ts"
+    "seed": "ts-node ./src/seed-dev-data.ts",
+    "docs": "npx @compodoc/compodoc -p tsconfig.compodoc.json -s"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
