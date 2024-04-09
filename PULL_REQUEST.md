@@ -303,6 +303,12 @@ The lifecycle of a calculation is as follows:
 
 ##### Limitations
 
+###### Testing
+
+- Due to lack of time, the retained solution is not tested.
+
+- However, even given some time, the solution may prove to be tedious to test, as only integration tests can be used to validate the solution, and they tend to be quite slow.
+
 ###### Units conversion
 
 The requirement states:
