@@ -47,7 +47,7 @@ export class CreateFoodProductDto {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateIngredientQuantityDto)
-  composition: CreateIngredientQuantityDto[];
+  ingredients: CreateIngredientQuantityDto[];
 
   static async fromObject(obj: any): Promise<CreateFoodProductDto> {
     const dto = plainToClass(CreateFoodProductDto, obj);

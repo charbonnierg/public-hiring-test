@@ -7,7 +7,7 @@ export class FooprintScoreTrigger1712606270365 implements MigrationInterface {
     await queryRunner.query(`CREATE OR REPLACE FUNCTION create_pending_score_from_product_update() RETURNS TRIGGER AS
     $$
     BEGIN
-        INSERT INTO pending_footprint_score VALUES(DEFAULT,new.id,NULL,'pending',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP);
+        INSERT INTO pending_carbon_footprint VALUES(DEFAULT,new.id,NULL,'pending',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP);
             RETURN new;
     END;
     $$ language plpgsql;
@@ -20,7 +20,7 @@ export class FooprintScoreTrigger1712606270365 implements MigrationInterface {
     await queryRunner.query(`CREATE OR REPLACE FUNCTION create_pending_score_from_factor_update() RETURNS TRIGGER AS
     $$
     BEGIN
-        INSERT INTO pending_footprint_score VALUES(DEFAULT,NULL,new.id,'pending',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP);
+        INSERT INTO pending_carbon_footprint VALUES(DEFAULT,NULL,new.id,'pending',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP);
         RETURN new;
     END;
     $$ language plpgsql;

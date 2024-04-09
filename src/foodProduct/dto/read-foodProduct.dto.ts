@@ -1,11 +1,9 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Exclude, Expose } from "class-transformer";
 import { IsNumber, IsString } from "class-validator";
-import {
-  FoodProduct,
-  Ingredient,
-  IngredientQuantity,
-} from "../foodProduct.entity";
+import { FoodIngredient } from "../foodIngredient.entity";
+import { FoodProduct } from "../foodProduct.entity";
+import { FoodProductIngredientQuantity } from "../foodProductIngredientQuantity.entity";
 
 /**
  * Data transfer object for an ingredient quantity
@@ -27,7 +25,10 @@ export class ReadIngredientQuantityDto {
   @ApiProperty()
   quantity: number;
 
-  static fromEntity(factor: IngredientQuantity, ingredient: Ingredient) {
+  static fromEntity(
+    factor: FoodProductIngredientQuantity,
+    ingredient: FoodIngredient,
+  ) {
     const dto = new ReadIngredientQuantityDto();
     dto.name = ingredient.name;
     dto.unit = ingredient.unit;
@@ -50,12 +51,12 @@ export class ReadFoodProductDto {
   @ApiProperty({
     type: [ReadIngredientQuantityDto],
   })
-  composition: ReadIngredientQuantityDto[];
+  ingredients: ReadIngredientQuantityDto[];
 
   static fromEntity(product: FoodProduct): ReadFoodProductDto {
     const dto = new ReadFoodProductDto();
     dto.name = product.name;
-    dto.composition = product.composition.map((factor) =>
+    dto.ingredients = product.ingredients.map((factor) =>
       ReadIngredientQuantityDto.fromEntity(factor, factor.ingredient),
     );
     return dto;

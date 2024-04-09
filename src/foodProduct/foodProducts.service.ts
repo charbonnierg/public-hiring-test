@@ -1,11 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import {
-  FoodProduct,
-  Ingredient,
-  IngredientQuantity,
-} from "./foodProduct.entity";
+import { FoodIngredient } from "./foodIngredient.entity";
+import { FoodProduct } from "./foodProduct.entity";
+import { FoodProductIngredientQuantity } from "./foodProductIngredientQuantity.entity";
 import { IFoodProductsService } from "./interface/foodProducts.service";
 
 @Injectable()
@@ -13,26 +11,26 @@ export class FoodProductsService implements IFoodProductsService {
   constructor(
     @InjectRepository(FoodProduct)
     private foodProductRepository: Repository<FoodProduct>,
-    @InjectRepository(Ingredient)
-    private ingredientRepository: Repository<Ingredient>,
-    @InjectRepository(IngredientQuantity)
-    private ingredientQuantityRepository: Repository<IngredientQuantity>,
+    @InjectRepository(FoodIngredient)
+    private ingredientRepository: Repository<FoodIngredient>,
+    @InjectRepository(FoodProductIngredientQuantity)
+    private ingredientQuantityRepository: Repository<FoodProductIngredientQuantity>,
   ) {}
   async save(props: {
     name: string;
-    composition: { name: string; unit: string; quantity: number }[];
+    ingredients: { name: string; unit: string; quantity: number }[];
   }): Promise<FoodProduct> {
     // FIXME: Use a transaction
     const product = new FoodProduct();
     product.name = props.name;
-    product.composition = [];
+    product.ingredients = [];
     await this.foodProductRepository.save(product);
-    for (const ingredient of props.composition) {
+    for (const ingredient of props.ingredients) {
       let ingredientEntity = await this.ingredientRepository.findOne({
         where: { name: ingredient.name, unit: ingredient.unit },
       });
       if (!ingredientEntity) {
-        ingredientEntity = new Ingredient();
+        ingredientEntity = new FoodIngredient();
         ingredientEntity.name = ingredient.name;
         ingredientEntity.unit = ingredient.unit;
         // Make sure the ingredient is saved
@@ -43,7 +41,7 @@ export class FoodProductsService implements IFoodProductsService {
         relations: { ingredient: true },
       });
       if (!quantityEntity) {
-        quantityEntity = new IngredientQuantity();
+        quantityEntity = new FoodProductIngredientQuantity();
         quantityEntity.product_id = product.id;
         quantityEntity.ingredient_id = ingredientEntity.id;
         quantityEntity.ingredient = ingredientEntity;
@@ -52,8 +50,8 @@ export class FoodProductsService implements IFoodProductsService {
       quantityEntity.quantity = ingredient.quantity;
       // Make sure the quantity is saved
       await quantityEntity.save();
-      // Add the quantity to the product composition
-      product.composition.push(quantityEntity);
+      // Add the quantity to the product ingredients
+      product.ingredients.push(quantityEntity);
     }
     return product;
   }
@@ -62,7 +60,7 @@ export class FoodProductsService implements IFoodProductsService {
     return this.foodProductRepository.findOne({
       where: { name: query.name },
       relations: {
-        composition: {
+        ingredients: {
           ingredient: true,
         },
       },
@@ -72,7 +70,7 @@ export class FoodProductsService implements IFoodProductsService {
   findAll(): Promise<FoodProduct[]> {
     return this.foodProductRepository.find({
       relations: {
-        composition: {
+        ingredients: {
           ingredient: true,
         },
       },
@@ -83,14 +81,14 @@ export class FoodProductsService implements IFoodProductsService {
     // NOTE: This does not return ingredients for a product
     return this.foodProductRepository.find({
       where: {
-        composition: {
+        ingredients: {
           ingredient: {
             name: query.name,
           },
         },
       },
       relations: {
-        composition: {
+        ingredients: {
           ingredient: false,
         },
       },

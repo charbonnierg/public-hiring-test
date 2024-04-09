@@ -1,15 +1,13 @@
-import { Repository } from "typeorm/repository/Repository";
+import { Repository } from "typeorm";
 import { GreenlyDataSource, dataSource } from "../../config/dataSource";
 import { getTestEmissionFactor } from "../seed-dev-data";
 import { ReadFoodProductDto } from "./dto/read-foodProduct.dto";
-import {
-  FoodProduct,
-  Ingredient,
-  IngredientQuantity,
-} from "./foodProduct.entity";
+import { FoodIngredient } from "./foodIngredient.entity";
+import { FoodProduct } from "./foodProduct.entity";
+import { FoodProductIngredientQuantity } from "./foodProductIngredientQuantity.entity";
 import { FoodProductsService } from "./foodProducts.service";
 
-let flourEmissionFactor = getTestEmissionFactor("flour");
+const flourEmissionFactor = getTestEmissionFactor("flour");
 let repository: Repository<FoodProduct>;
 let service: FoodProductsService;
 
@@ -21,8 +19,8 @@ beforeAll(async () => {
 beforeEach(async () => {
   service = new FoodProductsService(
     repository,
-    dataSource.getRepository(Ingredient),
-    dataSource.getRepository(IngredientQuantity),
+    dataSource.getRepository(FoodIngredient),
+    dataSource.getRepository(FoodProductIngredientQuantity),
   );
   await GreenlyDataSource.cleanDatabase();
 });
@@ -34,7 +32,7 @@ afterAll(async () => {
 const expectFoodProduct = async (obj: { name: string }) => {
   const retrieved = await repository.findOne({
     where: { name: obj.name },
-    relations: { composition: { ingredient: true } },
+    relations: { ingredients: { ingredient: true } },
   });
   expect(retrieved).not.toBeNull();
   expect(ReadFoodProductDto.fromEntity(retrieved as FoodProduct)).toMatchObject(
@@ -48,7 +46,7 @@ describe("FoodProductService", () => {
       // Arrange
       const foodProduct = {
         name: "Pizza",
-        composition: [
+        ingredients: [
           { name: "flour", unit: "kg", quantity: 0.1 },
           { name: "ham", unit: "kg", quantity: 0.2 },
           { name: "olive oil", unit: "kg", quantity: 0.1 },
@@ -67,7 +65,7 @@ describe("FoodProductService", () => {
       // Arrange
       const foodProduct = {
         name: "Pizza",
-        composition: [
+        ingredients: [
           { name: "flour", unit: "kg", quantity: 0.1 },
           { name: "ham", unit: "kg", quantity: 0.2 },
           { name: "olive oil", unit: "kg", quantity: 0.1 },
@@ -85,7 +83,7 @@ describe("FoodProductService", () => {
       const foodProducts = [
         {
           name: "Pizza",
-          composition: [
+          ingredients: [
             { name: "flour", unit: "kg", quantity: 0.1 },
             { name: "ham", unit: "kg", quantity: 0.2 },
             { name: "olive oil", unit: "kg", quantity: 0.1 },
@@ -93,7 +91,7 @@ describe("FoodProductService", () => {
         },
         {
           name: "Pasta",
-          composition: [
+          ingredients: [
             { name: "flour", unit: "kg", quantity: 0.2 },
             { name: "ham", unit: "kg", quantity: 0.1 },
             { name: "olive oil", unit: "kg", quantity: 0.1 },
@@ -123,7 +121,7 @@ describe("FoodProductService", () => {
       const foodProducts = [
         {
           name: "Pizza",
-          composition: [
+          ingredients: [
             { name: "flour", unit: "kg", quantity: 0.1 },
             { name: "ham", unit: "kg", quantity: 0.2 },
             { name: "olive oil", unit: "kg", quantity: 0.1 },
@@ -131,7 +129,7 @@ describe("FoodProductService", () => {
         },
         {
           name: "Pasta",
-          composition: [
+          ingredients: [
             { name: "flour", unit: "kg", quantity: 0.2 },
             { name: "ham", unit: "kg", quantity: 0.1 },
             { name: "olive oil", unit: "kg", quantity: 0.1 },
@@ -154,7 +152,7 @@ describe("FoodProductService", () => {
       // Arrange
       const foodProduct = {
         name: "Pizza",
-        composition: [
+        ingredients: [
           { name: "flour", unit: "kg", quantity: 0.1 },
           { name: "ham", unit: "kg", quantity: 0.2 },
           { name: "olive oil", unit: "kg", quantity: 0.1 },
@@ -174,7 +172,7 @@ describe("FoodProductService", () => {
       const foodProducts = [
         {
           name: "Pizza",
-          composition: [
+          ingredients: [
             { name: "flour", unit: "kg", quantity: 0.1 },
             { name: "ham", unit: "kg", quantity: 0.2 },
             { name: "olive oil", unit: "kg", quantity: 0.1 },
@@ -182,7 +180,7 @@ describe("FoodProductService", () => {
         },
         {
           name: "Pasta",
-          composition: [
+          ingredients: [
             { name: "flour", unit: "kg", quantity: 0.2 },
             { name: "ham", unit: "kg", quantity: 0.1 },
             { name: "olive oil", unit: "kg", quantity: 0.1 },
@@ -222,7 +220,7 @@ describe("FoodProductService", () => {
       const foodProducts = [
         {
           name: "Pizza",
-          composition: [
+          ingredients: [
             { name: "flour", unit: "kg", quantity: 0.1 },
             { name: "ham", unit: "kg", quantity: 0.2 },
             { name: "olive oil", unit: "kg", quantity: 0.1 },
@@ -230,7 +228,7 @@ describe("FoodProductService", () => {
         },
         {
           name: "HamSalad",
-          composition: [
+          ingredients: [
             { name: "lettuce", unit: "kg", quantity: 0.2 },
             { name: "ham", unit: "kg", quantity: 0.1 },
             { name: "olive oil", unit: "kg", quantity: 0.1 },
@@ -254,7 +252,7 @@ describe("FoodProductService", () => {
       const foodProducts = [
         {
           name: "Pizza",
-          composition: [
+          ingredients: [
             { name: "flour", unit: "kg", quantity: 0.1 },
             { name: "ham", unit: "kg", quantity: 0.2 },
             { name: "olive oil", unit: "kg", quantity: 0.1 },
@@ -262,7 +260,7 @@ describe("FoodProductService", () => {
         },
         {
           name: "Pasta",
-          composition: [
+          ingredients: [
             { name: "flour", unit: "kg", quantity: 0.2 },
             { name: "ham", unit: "kg", quantity: 0.1 },
             { name: "olive oil", unit: "kg", quantity: 0.1 },
@@ -292,7 +290,7 @@ describe("FoodProductService", () => {
       // Arrange
       const foodProduct = {
         name: "Pizza",
-        composition: [
+        ingredients: [
           { name: "flour", unit: "kg", quantity: 0.1 },
           { name: "ham", unit: "kg", quantity: 0.2 },
           { name: "olive oil", unit: "kg", quantity: 0.1 },

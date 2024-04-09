@@ -4,8 +4,8 @@ import { ScheduleModule } from "@nestjs/schedule";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { typeorm } from "../config/dataSource";
 import { CarbonEmissionFactorsModule } from "./carbonEmissionFactor/carbonEmissionFactors.module";
+import { CarbonFootprintsModule } from "./carbonFootprint/carbonFootprints.module";
 import { FoodProductsModule } from "./foodProduct/foodProducts.module";
-import { FootprintScoresModule } from "./footprintScore/footprintScores.module";
 
 @Module({
   imports: [
@@ -21,7 +21,7 @@ import { FootprintScoresModule } from "./footprintScore/footprintScores.module";
     }),
     CarbonEmissionFactorsModule,
     FoodProductsModule,
-    FootprintScoresModule,
+    CarbonFootprintsModule,
   ],
 })
 export class AppModule {}

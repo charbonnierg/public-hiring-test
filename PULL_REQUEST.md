@@ -139,23 +139,27 @@ The goal of this module is to provide a controller to:
 
 Update operations are not provided as they are not needed for this exercice.
 
-This module should also export a `FoodProductService` class for the controller to use, and for another module to use (see `FootprintScore` module below).
+This module should also export a `FoodProductService` class for the controller to use, and for another module to use (see `CarbonFootprint` module below).
 
 #### `FoodProduct` entity
 
 - 🎁 Introduce a new entity `FoodProduct`:
   - This entity has a single field `name`.
-  - It has a relation `composition`.
-    - `composition` is an array of `IngredientQuantity` entities (see below).
+  - It has a relation `ingredients`.
+    - `ingredients` is an array of `FoodProductIngredientQuantity` entities (see below).
 
-- 🎁 Introduce a new entity `Ingredient`:
+#### `FoodIngredient` entity
+
+- 🎁 Introduce a new entity `FoodIngredient`:
   - This entity has a `name` and a `unit`.
   - `unit` validation is very basic. It should be improved in the future.
 
-- 🎁 Introcuce a new entity `IngredientQuantity`:
+#### `FoodProductIngredientQuantity` entity
+
+- 🎁 Introcuce a new entity `FoodProductIngredientQuantity`:
   - This entity will allow to store the quantity of an ingredient in a food product.
   - This entity has a the fields `ingredient_id`, `product_id` and `quantity`.
-  - It has a relation `ingredient` to the `Ingredient` entity through the `ingredient_id` field.
+  - It has a relation `ingredient` to the `FoodIngredient` entity through the `ingredient_id` field.
   - It has a relation `product` to the `FoodProduct` entity through the `product_id` field.
 
 #### `FoodProductService`
@@ -176,7 +180,7 @@ This module should also export a `FoodProductService` class for the controller t
 
 ###### Units conversion
 
-- When asking to create a product with an ingredient expressed in a different unit than an existing product with same ingredient, the application will crash with a `500` status code. This is due to the fact that the application does not handle units conversion properly, and will try to create a new ingredient with the same name but a different unit, and there is a unique constraint on the `name` field in the `Ingredient` entity.
+- When asking to create a product with an ingredient expressed in a different unit than an existing product with same ingredient, the application will crash with a `500` status code. This is due to the fact that the application does not handle units conversion properly, and will try to create a new ingredient with the same name but a different unit, and there is a unique constraint on the `name` field in the `FoodIngredient` entity.
 
   - This is intentionally left out as I'm not sure whether the units should exist in the database schema, e.g, why not a column `quantityInKg` ? If for any reason we must store the unit in database, then we should have a function to convert the quantity of an ingredient in the unit of the ingredient in the database, and tests for that too.
 
@@ -199,11 +203,11 @@ This module should also export a `FoodProductService` class for the controller t
 - The `FoodProductController` is not optimized for performance. Several comments have been added to indicate where the code could be optimized.
 
 
-### `FootprintScore` module
+### `CarbonFootprint` module
 
-The `FootprintScore` module has been created to handle the carbon footprint calculation and storage.
+The `CarbonFootprint` module has been created to handle the carbon footprint calculation and storage.
 
-I'm not very confident in the way the module is organized, and I'm not sure if the `FootprintScoreService` class is the right place to handle the calculation. It may be better to have a dedicated class, completely unrelated to either `NestJS` or `TypeORM` for the calculation. I'm not sure what are the best practices in this case.
+I'm not very confident in the way the module is organized, and I'm not sure if the `CarbonFootprintService` class is the right place to handle the calculation. It may be better to have a dedicated class, completely unrelated to either `NestJS` or `TypeORM` for the calculation. I'm not sure what are the best practices in this case.
 
 ### Rational
 
@@ -253,9 +257,9 @@ Several solutions are possible to solve this problem:
     - IMO, it also **violates the first requirement of the exercice** which is: `Stack: NestJs + TypeORM + Postgres`. Using `redis` would introduce a new technology in the stack.
 
 4. **Pending inserts in SQL tables and polling**:
-    - Upon creating a product in the SQL table, a trigger is fired and **inserts a row in a `pending_footprint_score` table**.
-    - Every `n` seconds, a worker checks the `pending_footprint_score` table and calculates the carbon footprint for the products that are not yet calculated.
-    - The result is stored in the `footprint_score` table.
+    - Upon creating a product in the SQL table, a trigger is fired and **inserts a row in a `pending_carbon_footprint` table**.
+    - Every `n` seconds, a worker checks the `pending_carbon_footprint` table and calculates the carbon footprint for the products that are not yet calculated.
+    - The result is stored in the `carbon_footprint_contribution` table.
     - The user can retrieve the result using a `GET` endpoint once the result is stored.
     - This solution is a compromise between the previous two solutions.
     - It is more complex to implement than the first solution, but it is simpler than the third solution.
@@ -263,21 +267,23 @@ Several solutions are possible to solve this problem:
     - While it may not seem very elegant, this is battle tested, and this is a very easy solution to understand.
     - `TypeORM` migrations allows defining triggers, so this is transparent to the developer.
     - This is the solution I have chosen to implement.
+  
+  > Note: using a trigger to create entries into the `pending_carbon_footprint` table avoids the need to manually insert entries whenever a product or a factor is mutated. This is helpful because it avoid leaky domain abstractions (i.e., the need to remember to insert a row in the `pending_carbon_footprint` table whenever a product is created).
 
 #### Retained solution
 
 I have chosen to implement the fourth solution.
 
-The `FootprintScore` module is organized as follows:
+The `CarbonFootprint` module is organized as follows:
 
-- `FootprintScoreContribution` entity:
+- `CarbonFootprintContribution` entity:
   - This entity stores the result of the carbon footprint calculation for a **single ingredient**
-  - It has a relation to the `FoodProduct` entity through the `IngredientQuantity` entity.
-  - It has a relation to the `CarbonEmissionFactor` entity.
+  - It has a relation to the `FoodProduct` entity and the `FoodIngredient` entity through the `FoodProductIngredientQuantity` entity with the `quantity_id` field.
+  - It has a relation to the `CarbonEmissionFactor` entity through the `factor_id` field.
 
 > I have chosen to store the result of the calculation for a single ingredient, as this is the most atomic unit of the calculation. This allows to store the result of the calculation for each ingredient, and then either using SQL or on client side sum the results to get the total carbon footprint of the product and the percentage of each ingredient in the total carbon footprint.
 
-- `PendingFootprintScore` entity:
+- `PendingCarbonFootprint` entity:
   - This entity designates the need for a calculation of the carbon footprint for either a **single food product** or **all products using a specific ingredient**.
   - It has a relation to the `FoodProduct` entity.
   - It has a relation to the `CarbonEmissionFactor` entity.
@@ -288,9 +294,9 @@ The `FootprintScore` module is organized as follows:
 The lifecycle of a calculation is as follows:
 
 1. A user creates/deletes a food product OR a carbon emission factor.
-2. A trigger is fired and inserts a row in the `pending_footprint_score` table.
-3. A worker checks the `pending_footprint_score` table and calculates the carbon footprint for the products that are not yet calculated.
-4. The result is stored in the `footprint_score` table.
+2. A trigger is fired and inserts a row in the `pending_carbon_footprint` table.
+3. A worker checks the `pending_carbon_footprint` table and calculates the carbon footprint for the products that are not yet calculated.
+4. The result is stored in the `carbon_footprint_contribution` table.
 5. The user can retrieve the result using a `GET` endpoint once the result is stored.
 
 ##### Benefits
@@ -299,7 +305,7 @@ The lifecycle of a calculation is as follows:
 - The calculation is not lost in case of a server crash.
 - The calculation still hapens in Typescript within the `NestJS` application, we're not using a complex `plsql` function.
 - The polling mechanism is simple to implement and understand. It even supports having multiple workers if needed thanks to `FOR UPDATE SKIP LOCKED` SQL statement.
-- The calculation is done for each ingredient, which allows to have a detailed representation of the carbon footprint of the product (`ReadFootprintScoreDto`).
+- The calculation is done for each ingredient, which allows to have a detailed representation of the carbon footprint of the product (`ReadCarbonFootprintDto`).
 
 ##### Limitations
 
@@ -336,7 +342,7 @@ As this design would break the existing database schema, I decided not to implem
 
 ###### Polling error handling
 
-The error handling is very basic. If the calculation fails, the `status` field of the `PendingFootprintScore` entity is never updated and stays into `pending` state. This is a limitation of the current implementation.
+The error handling is very basic. If the calculation fails, the `status` field of the `PendingCarbonFootprint` entity is never updated and stays into `pending` state. This is a limitation of the current implementation.
 
 It's not possible to explicitely mark a calculation as `failed` from the worker. This should be implemented.
 
@@ -352,6 +358,21 @@ In total, it means that 3 workers should be implemented:
 
 With this, the system would be more robust and would handle errors more gracefully.
 
+### Database Schema
+
+![Database Schema](./migrations/db-schema.png)
+
+> Note: Diagram has been generated using [pgAdmin](https://www.pgadmin.org/)
+>
+> <details><summary>Steps to reproduce</summary>
+> 
+> 1. Visit http://localhost:5050
+> 2. Login using `user@db.io` and `pwd`
+> 3. Create a new connection named `Dev` to the `postgres` host on port `5432` using `user` and `pwd`
+> 4. Right click on `Servers` > `Dev` > `database` > `ERD for database`
+> 5. Use `Alt + Ctrl + I` to generate the image 
+> 
+> </details>
 
 ### Developer Tools
 
@@ -362,7 +383,7 @@ With this, the system would be more robust and would handle errors more graceful
 
 - [x] `FoodProductModule` to handle the food product CRUD operations.
 
-- [x] `FootprintScoreModule` to handle the carbon footprint calculation and storage.
+- [x] `CarbonFootprintModule` to handle the carbon footprint calculation and storage.
 
 Run `yarn docs` and open the `http://localhost:8080` to see the documentation for each module.
 
@@ -380,7 +401,8 @@ One major downside is that tests rely on a lot on infrastructure. Developers mor
 
 The following tasks are still pending:
 
-- [ ] Provide unit test for `footprintScoreService`.
+- [ ] Provide unit test for `CarbonFootprintService` and the `PendingCarbonFootprintService`.
+- [ ] Provide a robust implementation to handle unit conversion.
 - [ ] Provide a way to compute coverage which includes the e2e tests.
 - [ ] Provide a GitHub action to run the tests on PRs.
 - [ ] Provide a pre-commit hook to format the code with prettier and type checking before commiting.

@@ -6,7 +6,7 @@ describe("CreateFoodProductDto", () => {
       // Arrange
       const obj = {
         name: "product",
-        composition: [
+        ingredients: [
           {
             name: "ingredient",
             quantity: 1,
@@ -25,7 +25,7 @@ describe("CreateFoodProductDto", () => {
     it("should refuse to create a new instance of CreateFoodProductDto if the object is missing a name", async () => {
       // Arrange
       const obj = {
-        composition: [
+        ingredients: [
           {
             name: "ingredient",
             quantity: 1,
@@ -51,7 +51,7 @@ describe("CreateFoodProductDto", () => {
       // Arrange
       const obj = {
         name: "p",
-        composition: [
+        ingredients: [
           {
             name: "ingredient",
             quantity: 1,
@@ -73,7 +73,7 @@ describe("CreateFoodProductDto", () => {
         ]);
       });
     });
-    it("should refuse to create a new instance of CreateFoodProductDto if the object is missing a composition", async () => {
+    it("should refuse to create a new instance of CreateFoodProductDto if the object is missing a ingredients", async () => {
       // Arrange
       const obj = {
         name: "product",
@@ -85,18 +85,18 @@ describe("CreateFoodProductDto", () => {
         expect(err).toMatchObject([
           {
             constraints: {
-              isArray: "composition must be an array",
+              isArray: "ingredients must be an array",
             },
-            property: "composition",
+            property: "ingredients",
           },
         ]);
       });
     });
-    it("should refuse to create a new instance of CreateFoodProductDto if the object composition is not an array", async () => {
+    it("should refuse to create a new instance of CreateFoodProductDto if the object ingredients is not an array", async () => {
       // Arrange
       const obj = {
         name: "product",
-        composition: "ingredient",
+        ingredients: "ingredient",
       };
 
       // Act & Assert
@@ -105,18 +105,18 @@ describe("CreateFoodProductDto", () => {
         expect(err).toMatchObject([
           {
             constraints: {
-              isArray: "composition must be an array",
+              isArray: "ingredients must be an array",
             },
-            property: "composition",
+            property: "ingredients",
           },
         ]);
       });
     });
-    it("should refuse to create a new instance of CreateFoodProductDto if the object composition is an empty array", async () => {
+    it("should refuse to create a new instance of CreateFoodProductDto if the object ingredients is an empty array", async () => {
       // Arrange
       const obj = {
         name: "product",
-        composition: [],
+        ingredients: [],
       };
 
       // Act & Assert
@@ -125,18 +125,18 @@ describe("CreateFoodProductDto", () => {
         expect(err).toMatchObject([
           {
             constraints: {
-              arrayMinSize: "composition must contain at least 1 elements",
+              arrayMinSize: "ingredients must contain at least 1 elements",
             },
-            property: "composition",
+            property: "ingredients",
           },
         ]);
       });
     });
-    it("should refuse to create a new instance of CreateFoodProductDto if one of the composition elements is missing a name", async () => {
+    it("should refuse to create a new instance of CreateFoodProductDto if one of the ingredients elements is missing a name", async () => {
       // Arrange
       const obj = {
         name: "product",
-        composition: [
+        ingredients: [
           {
             quantity: 1,
             unit: "kg",
@@ -163,16 +163,16 @@ describe("CreateFoodProductDto", () => {
                 property: "0",
               },
             ],
-            property: "composition",
+            property: "ingredients",
           },
         ]);
       });
     });
-    it("should refuse to create a new instance of CreateFoodProductDto if one of the composition elements name is less than 2 characters", async () => {
+    it("should refuse to create a new instance of CreateFoodProductDto if one of the ingredients elements name is less than 2 characters", async () => {
       // Arrange
       const obj = {
         name: "product",
-        composition: [
+        ingredients: [
           {
             name: "i",
             quantity: 1,
@@ -200,16 +200,16 @@ describe("CreateFoodProductDto", () => {
                 property: "0",
               },
             ],
-            property: "composition",
+            property: "ingredients",
           },
         ]);
       });
     });
-    it("should refuse to create a new instance of CreateFoodProductDto if one of the composition elements is missing a quantity", async () => {
+    it("should refuse to create a new instance of CreateFoodProductDto if one of the ingredients elements is missing a quantity", async () => {
       // Arrange
       const obj = {
         name: "product",
-        composition: [
+        ingredients: [
           {
             name: "ingredient",
             unit: "kg",
@@ -236,7 +236,7 @@ describe("CreateFoodProductDto", () => {
                 property: "0",
               },
             ],
-            property: "composition",
+            property: "ingredients",
           },
         ]);
       });

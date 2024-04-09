@@ -1,14 +1,16 @@
-import { HttpException, HttpStatus, ValidationPipe } from "@nestjs/common";
 import {
   Body,
   Controller,
   Delete,
   Get,
   HttpCode,
+  HttpException,
+  HttpStatus,
+  Logger,
   Param,
   Post,
-} from "@nestjs/common/decorators";
-import { Logger } from "@nestjs/common/services";
+  ValidationPipe,
+} from "@nestjs/common";
 import {
   ApiCreatedResponse,
   ApiNoContentResponse,
@@ -102,7 +104,7 @@ export class FoodProductsController {
     this.logger.log(`[POST /] creating product ${createFoodProductDto.name}`);
     const result = await this.foodProductsService.save({
       name: createFoodProductDto.name,
-      composition: createFoodProductDto.composition,
+      ingredients: createFoodProductDto.ingredients,
     });
     return ReadFoodProductDto.fromEntity(result);
   }

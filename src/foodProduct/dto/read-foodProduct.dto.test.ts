@@ -1,9 +1,7 @@
 import { plainToInstance } from "class-transformer";
-import {
-  FoodProduct,
-  Ingredient,
-  IngredientQuantity,
-} from "../foodProduct.entity";
+import { FoodIngredient } from "../foodIngredient.entity";
+import { FoodProduct } from "../foodProduct.entity";
+import { FoodProductIngredientQuantity } from "../foodProductIngredientQuantity.entity";
 import { ReadFoodProductDto } from "./read-foodProduct.dto";
 
 describe("ReadFoodProductDto", () => {
@@ -13,19 +11,19 @@ describe("ReadFoodProductDto", () => {
       const product = plainToInstance(FoodProduct, {
         id: 1,
         name: "product",
-        composition: [],
+        ingredients: [],
       });
-      const ingredient = plainToInstance(Ingredient, {
+      const ingredient = plainToInstance(FoodIngredient, {
         id: 1,
         name: "ingredient",
         unit: "kg",
       });
-      const quantity = plainToInstance(IngredientQuantity, {
+      const quantity = plainToInstance(FoodProductIngredientQuantity, {
         ingredient_id: 1,
         product_id: 1,
         quantity: 1,
       });
-      product.composition.push(quantity);
+      product.ingredients.push(quantity);
       quantity.ingredient = ingredient;
       // Act
       const result = ReadFoodProductDto.fromEntity(product);
@@ -34,7 +32,7 @@ describe("ReadFoodProductDto", () => {
       expect(result).toBeInstanceOf(ReadFoodProductDto);
       expect(result).toMatchObject({
         name: product.name,
-        composition: [
+        ingredients: [
           {
             name: ingredient.name,
             quantity: quantity.quantity,

@@ -6,7 +6,7 @@ export interface IFoodProductsService {
    */
   save(props: {
     name: string;
-    composition: {
+    ingredients: {
       name: string;
       unit: string;
       quantity: number;

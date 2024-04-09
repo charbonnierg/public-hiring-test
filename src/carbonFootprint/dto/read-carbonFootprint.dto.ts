@@ -1,10 +1,10 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Exclude, Expose } from "class-transformer";
 import { IsNumber, IsString } from "class-validator";
-import { FootprintScoreContribution } from "../footprintScore.entity";
+import { CarbonFootprintContribution } from "../carbonFootprintContribution.entity";
 
 @Exclude()
-export class ContributionDto {
+export class ReadCarbonFootprintContributionDto {
   @Expose()
   @IsString()
   @ApiProperty()
@@ -22,7 +22,7 @@ export class ContributionDto {
 }
 
 @Exclude()
-export class ReadFootprintScoreDto {
+export class ReadCarbonFootprintDto {
   @Expose()
   @IsString()
   @ApiProperty()
@@ -35,19 +35,19 @@ export class ReadFootprintScoreDto {
 
   @Expose()
   @ApiProperty({
-    type: [ContributionDto],
+    type: [ReadCarbonFootprintContributionDto],
   })
-  contributions: ContributionDto[];
+  contributions: ReadCarbonFootprintContributionDto[];
 
   static fromEntity(
     product: string,
-    entity: FootprintScoreContribution[],
-  ): ReadFootprintScoreDto {
-    const dto = new ReadFootprintScoreDto();
+    entity: CarbonFootprintContribution[],
+  ): ReadCarbonFootprintDto {
+    const dto = new ReadCarbonFootprintDto();
     dto.product = product;
     dto.score = entity.reduce((acc, curr) => acc + curr.score, 0);
     dto.contributions = entity.map((c) => {
-      const contribution = new ContributionDto();
+      const contribution = new ReadCarbonFootprintContributionDto();
       contribution.ingredient = c.quantity.ingredient.name;
       contribution.score = c.score;
       contribution.percentage = (c.score / dto.score) * 100;

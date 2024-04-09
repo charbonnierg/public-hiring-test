@@ -2,41 +2,43 @@ import {
   Controller,
   Get,
   HttpCode,
+  HttpException,
+  HttpStatus,
+  Logger,
   Param,
   Post,
-} from "@nestjs/common/decorators";
-import { HttpStatus } from "@nestjs/common/enums";
-import { HttpException } from "@nestjs/common/exceptions";
-import { Logger } from "@nestjs/common/services";
+} from "@nestjs/common";
 import {
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiTags,
 } from "@nestjs/swagger";
-import { ReadFootprintScoreDto } from "./dto/read-footprintScore.dto";
-import { FootprintScoreService } from "./footprintScore.service";
+import { CarbonFootprintService } from "./carbonFootprints.service";
+import { ReadCarbonFootprintDto } from "./dto/read-carbonFootprint.dto";
 
 @ApiTags("footprint-scores")
 @Controller("footprint-scores")
-export class FootprintScoresController {
-  private readonly logger = new Logger(FootprintScoresController.name);
+export class CarbonFootprintController {
+  private readonly logger = new Logger(CarbonFootprintController.name);
 
-  constructor(private readonly foodProductsService: FootprintScoreService) {}
+  constructor(
+    private readonly carbonFootprintService: CarbonFootprintService,
+  ) {}
 
   @Get(":product")
   @ApiOkResponse({
     description: "The footprint score has successfully been read.",
-    type: ReadFootprintScoreDto,
+    type: ReadCarbonFootprintDto,
   })
   @ApiNotFoundResponse({
     description: "The footprint score for the product was not found.",
   })
   async getFootprintScore(
     @Param("product") product: string,
-  ): Promise<ReadFootprintScoreDto> {
+  ): Promise<ReadCarbonFootprintDto> {
     this.logger.log(`[GET /${product}] reading footprint score for ${product}`);
-    const contributions = await this.foodProductsService.get(product);
+    const contributions = await this.carbonFootprintService.get(product);
     if (!contributions) {
       this.logger.warn(
         `[GET /${product}] footprint score for ${product} not found`,
@@ -50,14 +52,14 @@ export class FootprintScoresController {
         HttpStatus.NOT_FOUND,
       );
     }
-    return ReadFootprintScoreDto.fromEntity(product, contributions);
+    return ReadCarbonFootprintDto.fromEntity(product, contributions);
   }
 
   @Post(":product")
   @HttpCode(201)
   @ApiCreatedResponse({
     description: "The footprint score has successfully been updated.",
-    type: ReadFootprintScoreDto,
+    type: ReadCarbonFootprintDto,
   })
   @ApiNotFoundResponse({
     description:
@@ -65,11 +67,11 @@ export class FootprintScoresController {
   })
   async updateFootprintScore(
     @Param("product") product: string,
-  ): Promise<ReadFootprintScoreDto> {
+  ): Promise<ReadCarbonFootprintDto> {
     this.logger.log(
       `[POST /${product}] updating footprint score for ${product}`,
     );
-    const contributions = await this.foodProductsService.save(product);
+    const contributions = await this.carbonFootprintService.save(product);
     if (!contributions) {
       this.logger.warn(
         `[POST /${product}] footprint score for ${product} not found`,
@@ -83,6 +85,6 @@ export class FootprintScoresController {
         HttpStatus.NOT_FOUND,
       );
     }
-    return ReadFootprintScoreDto.fromEntity(product, contributions);
+    return ReadCarbonFootprintDto.fromEntity(product, contributions);
   }
 }

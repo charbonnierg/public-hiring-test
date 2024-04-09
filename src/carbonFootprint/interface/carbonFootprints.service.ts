@@ -1,12 +1,12 @@
-import { FootprintScoreContribution } from "../footprintScore.entity";
+import { CarbonFootprintContribution } from "../carbonFootprintContribution.entity";
 
-export interface IFootprintScoreService {
+export interface ICarbonFootprintService {
   /**
    * Get the footprint score contributins for a product.
    *
    * @param product The name of the product for which to get the footprint score
    */
-  get(product: string): Promise<FootprintScoreContribution[] | null>;
+  get(product: string): Promise<CarbonFootprintContribution[] | null>;
 
   /**
    * Update the footprint score contributions for a product.
@@ -17,12 +17,5 @@ export interface IFootprintScoreService {
    *
    * @param product The name of the product for which to update the footprint score
    */
-  save(product: string): Promise<FootprintScoreContribution[] | null>;
-
-  /**
-   * Process all pending footprint score contributions and return them.
-   */
-  processPending(): Promise<
-    Record<string, FootprintScoreContribution[] | null>
-  >;
+  save(product: string): Promise<CarbonFootprintContribution[] | null>;
 }

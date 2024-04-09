@@ -5,9 +5,9 @@ import { getTestEmissionFactor } from "../seed-dev-data";
 import { CarbonEmissionFactor } from "./carbonEmissionFactor.entity";
 import { CarbonEmissionFactorsService } from "./carbonEmissionFactors.service";
 
-let flourEmissionFactor = getTestEmissionFactor("flour");
-let hamEmissionFactor = getTestEmissionFactor("ham");
-let olivedOilEmissionFactor = getTestEmissionFactor("oliveOil");
+const flourEmissionFactor = getTestEmissionFactor("flour");
+const hamEmissionFactor = getTestEmissionFactor("ham");
+const olivedOilEmissionFactor = getTestEmissionFactor("oliveOil");
 let repository: Repository<CarbonEmissionFactor>;
 let service: CarbonEmissionFactorsService;
 
