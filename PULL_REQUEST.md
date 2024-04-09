@@ -235,6 +235,43 @@ Several solutions are possible to solve this problem:
     - `TypeORM` migrations allows defining triggers, so this is transparent to the developer.
     - This is the solution I have chosen to implement.
 
+#### Retained solution
+
+I have chosen to implement the fourth solution.
+
+The `FootprintScore` module is organized as follows:
+
+- `FootprintScoreContribution` entity:
+  - This entity stores the result of the carbon footprint calculation for a **single ingredient**
+  - It has a relation to the `FoodProduct` entity through the `IngredientQuantity` entity.
+  - It has a relation to the `CarbonEmissionFactor` entity.
+
+> I have chosen to store the result of the calculation for a single ingredient, as this is the most atomic unit of the calculation. This allows to store the result of the calculation for each ingredient, and then either using SQL or on client side sum the results to get the total carbon footprint of the product and the percentage of each ingredient in the total carbon footprint.
+
+- `PendingFootprintScore` entity:
+  - This entity designates the need for a calculation of the carbon footprint for either a **single food product** or **all products using a specific ingredient**.
+  - It has a relation to the `FoodProduct` entity.
+  - It has a relation to the `CarbonEmissionFactor` entity.
+  - It has a `status` field to indicate if the calculation is pending, in progress or failed.
+  - It has a `created_at` field to indicate when the calculation was requested.
+  - It has a `last_udpdate` field to indicate when the calculation was last updated.
+
+The lifecycle of a calculation is as follows:
+
+1. A user creates/deletes a food product OR a carbon emission factor.
+2. A trigger is fired and inserts a row in the `pending_footprint_score` table.
+3. A worker checks the `pending_footprint_score` table and calculates the carbon footprint for the products that are not yet calculated.
+4. The result is stored in the `footprint_score` table.
+5. The user can retrieve the result using a `GET` endpoint once the result is stored.
+
+##### Benefits
+
+- The calculation is done in the background.
+- The calculation is not lost in case of a server crash.
+- The calculation still hapens in Typescript within the `NestJS` application, we're not using a complex `plsql` function.
+- The polling mechanism is simple to implement and understand. It even supports having multiple workers if needed thanks to `FOR UPDATE SKIP LOCKED` SQL statement.
+- The calculation is done for each ingredient, which allows to have a detailed representation of the carbon footprint of the product (`ReadFootprintScoreDto`).
+
 ### Developer Tools
 
 - [x] OpenAPI documentation using `@nest/swagger`.
