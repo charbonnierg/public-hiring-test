@@ -1,3 +1,7 @@
 node_modules
 dist
 src/coverage
+.vscode
+!.vscode/settings.default.json
+!.vscode/extensions.json
+!.vscode/launch.json
