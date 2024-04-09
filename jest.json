@@ -4,6 +4,7 @@
   "rootDir": "./src",
   "testEnvironment": "node",
   "testRegex": ".test.ts",
+  "testPathIgnorePatterns": ["e2e-test"],
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
   }

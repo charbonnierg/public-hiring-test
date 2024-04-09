@@ -1,6 +1,4 @@
 import { plainToClass } from "class-transformer";
-import { dataSource } from "../config/dataSource";
-import { CarbonEmissionFactor } from "./carbonEmissionFactor/carbonEmissionFactor.entity";
 import { CreateCarbonEmissionFactorDto } from "./carbonEmissionFactor/dto/create-carbonEmissionFactor.dto";
 
 export const TEST_CARBON_EMISSION_FACTORS = [
@@ -65,16 +63,3 @@ export const getTestEmissionFactor = (name: string) => {
   }
   return emissionFactor;
 };
-
-export const seedTestCarbonEmissionFactors = async () => {
-  if (!dataSource.isInitialized) {
-    await dataSource.initialize();
-  }
-  const factorsRepository = dataSource.getRepository(CarbonEmissionFactor);
-
-  await factorsRepository.save(TEST_CARBON_EMISSION_FACTORS);
-};
-
-if (require.main === module) {
-  seedTestCarbonEmissionFactors().catch((e) => console.error(e));
-}

@@ -85,8 +85,8 @@ Some of the changes are breaking changes and will require changes in the client 
   - This method will allow to search for a `CarbonEmissionFactor` entity by its name.
   - If the name is not found, the method will return `null`. This is a design choice, it could be changed to throw an error instead.
 
-- 🎁 Add a `findListByNames` method:
-  - This method will allow to search for a list of `CarbonEmissionFactor` entities by their names.
+- 🎁 Add a `findSetByNames` method:
+  - This method will allow to search for a set of `CarbonEmissionFactor` entities by their names.
   - If any of the names is not found, the method will return `null`. This is a design choice, it could be changed to throw an error instead.
 
 - 🎁 Add a `delete` method:
@@ -396,6 +396,8 @@ The philosophy behind the tests is to test the happy path, and to test the most 
 Efforts have been made to avoid relying on implementation details in the tests, and to test the public API of the application. IMO, at the initial stage of a project, it is more important to have a good coverage of the public API than to have a good coverage of the implementation details.
 
 One major downside is that tests rely on a lot on infrastructure. Developers more experienced with TypeORM may be able to provide a better testing strategy.
+
+EDIT: Some efforts have been made in order to make the `CarbonEmissionFactorModule` more testable. The `CarbonEmissionFactorService` now uses an interface `ICarbonEmissionFactorRepository` that can be stubbed in tests. This is a good practice to avoid relying on the `TypeORM` repository in the tests. Also, in order to make sure that stub implementation is correct, and to make sure that the TypeORM implementation is correct, an end-to-end test has been added to test the `CarbonEmissionFactorModule`.
 
 ## Further work
 

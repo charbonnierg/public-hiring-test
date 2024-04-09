@@ -1,5 +1,10 @@
 import { CarbonEmissionFactor } from "../carbonEmissionFactor.entity";
 
+export interface Indice {
+  columns: string[];
+  unique: boolean;
+}
+
 /**
  * Repository for managing carbon emission factors.
  */
@@ -32,4 +37,9 @@ export interface ICarbonEmissionFactorsRepository {
    * Delete a single carbon emission factor.
    */
   deleteOne: (name: string) => Promise<boolean>;
+  /**
+   * Get all indices on the underlying table.
+   * Mainly used for testing.
+   */
+  indices: () => Promise<Indice[]>;
 }

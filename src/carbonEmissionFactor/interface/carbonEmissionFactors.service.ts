@@ -44,7 +44,7 @@ export interface ICarbonEmissionFactorService {
    *
    * @param query An object with a property `names` to search for
    */
-  findListByNames(query: {
+  findSetByNames(query: {
     names: string[];
   }): Promise<CarbonEmissionFactor[] | null>;
 

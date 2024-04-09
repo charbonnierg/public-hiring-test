@@ -32,7 +32,7 @@ export class CarbonEmissionFactorsService
    * @param query An object with a field `names` to search for.
    * @returns The carbon emission factors if all factors are found, null otherwise.
    */
-  async findListByNames(query: {
+  async findSetByNames(query: {
     names: string[];
   }): Promise<CarbonEmissionFactor[] | null> {
     const factors = await this.carbonEmissionFactorRepository.find(query.names);

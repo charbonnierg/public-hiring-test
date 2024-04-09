@@ -73,7 +73,7 @@ export class CarbonFootprintService implements ICarbonFootprintService {
     // We can then get a list of ingredient names
     const ingredientNames = entity.ingredients.map((c) => c.ingredient.name);
     // And then query a list of factors
-    const factors = await this.carbonEmissionFactorsService.findListByNames({
+    const factors = await this.carbonEmissionFactorsService.findSetByNames({
       names: ingredientNames,
     });
     if (!factors) {

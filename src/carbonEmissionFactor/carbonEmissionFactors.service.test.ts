@@ -1,51 +1,80 @@
+import { Test, TestingModule } from "@nestjs/testing";
+
 import { instanceToPlain } from "class-transformer";
-import { Repository } from "typeorm";
-import { dataSource, GreenlyDataSource } from "../../config/dataSource";
 import { getTestEmissionFactor } from "../seed-dev-data";
 import { CarbonEmissionFactor } from "./carbonEmissionFactor.entity";
-import { CarbonEmissionFactorsRepository } from "./carbonEmissionFactors.repository";
+import {
+  CarbonEmissionFactorsRepository,
+  InMemoryCarbonEmissionFactorsRepository,
+} from "./carbonEmissionFactors.repository";
 import { CarbonEmissionFactorsService } from "./carbonEmissionFactors.service";
 
 const flourEmissionFactor = getTestEmissionFactor("flour");
 const hamEmissionFactor = getTestEmissionFactor("ham");
 const olivedOilEmissionFactor = getTestEmissionFactor("oliveOil");
 
-beforeAll(async () => {
-  await dataSource.initialize();
-});
+const expectFactorToMatch = (
+  factor: CarbonEmissionFactor | null,
+  expectedFactor: CarbonEmissionFactor,
+) => {
+  expect(factor).not.toBeNull();
+  expect(instanceToPlain(factor)).toMatchObject(
+    instanceToPlain(expectedFactor),
+  );
+};
 
-afterAll(async () => {
-  await dataSource.destroy();
-});
+const expectFactorsToMatch = (
+  factors: CarbonEmissionFactor[] | null,
+  expectedFactors: CarbonEmissionFactor[],
+) => {
+  expect(factors).not.toBeNull();
+  expect(factors).toHaveLength(expectedFactors.length);
+  for (let i = 0; i < expectedFactors.length; i++) {
+    expect(factors).toContainEqual(instanceToPlain(expectedFactors[i]));
+  }
+};
 
 describe("CarbonEmissionFactors.service", () => {
-  let repository: Repository<CarbonEmissionFactor>;
+  let module: TestingModule;
+  let repository: InMemoryCarbonEmissionFactorsRepository;
   let service: CarbonEmissionFactorsService;
+  afterEach(async () => {
+    await module.close();
+  });
   beforeEach(async () => {
-    repository = dataSource.getRepository(CarbonEmissionFactor);
-    const carbonEmissionFactorsRepository = new CarbonEmissionFactorsRepository(
-      repository,
+    module = await Test.createTestingModule({
+      providers: [
+        {
+          provide: CarbonEmissionFactorsRepository,
+          useClass: InMemoryCarbonEmissionFactorsRepository,
+        },
+        CarbonEmissionFactorsService,
+      ],
+    }).compile();
+
+    service = module.get<CarbonEmissionFactorsService>(
+      CarbonEmissionFactorsService,
     );
-    service = new CarbonEmissionFactorsService(carbonEmissionFactorsRepository);
-    await GreenlyDataSource.cleanDatabase();
+    repository = module.get<InMemoryCarbonEmissionFactorsRepository>(
+      CarbonEmissionFactorsRepository,
+    );
+  });
+  it("should return null when there is no factor", async () => {
+    const factor = await service.findByName({ name: "unknown-factor" });
+    expect(factor).toBeNull();
   });
   it("should save a new emission factor", async () => {
     const factor = await service.save(olivedOilEmissionFactor);
-    expect(instanceToPlain(factor)).toMatchObject(
-      instanceToPlain(olivedOilEmissionFactor),
+    expectFactorToMatch(factor, olivedOilEmissionFactor);
+    const retrievedFactor = await repository.findOne(
+      olivedOilEmissionFactor.name,
     );
-    expect(factor.hasId()).toBe(true);
-    const retrievedFactor = await repository.findOneBy({
-      name: olivedOilEmissionFactor.name,
-    });
-    expect(instanceToPlain(retrievedFactor)).toEqual(instanceToPlain(factor));
+    expectFactorToMatch(retrievedFactor, factor);
   });
   it("should save new emissionFactors in bulk", async () => {
     await service.saveBulk([hamEmissionFactor, flourEmissionFactor]);
-    const retrieveChickenEmissionFactor = await dataSource
-      .getRepository(CarbonEmissionFactor)
-      .findOne({ where: { name: "flour" } });
-    expect(retrieveChickenEmissionFactor?.name).toBe("flour");
+    const retrieveChickenEmissionFactor = await repository.findOne("flour");
+    expectFactorToMatch(retrieveChickenEmissionFactor, flourEmissionFactor);
   });
   it("should return an empty list when there is no factor", async () => {
     const factors = await service.findAll();
@@ -55,37 +84,28 @@ describe("CarbonEmissionFactors.service", () => {
     await service.save(olivedOilEmissionFactor);
     const carbonEmissionFactors = await service.findAll();
     expect(carbonEmissionFactors).toHaveLength(1);
-    const factor = carbonEmissionFactors[0];
-    expect(instanceToPlain(factor)).toEqual(
-      instanceToPlain(olivedOilEmissionFactor),
-    );
+    expectFactorToMatch(carbonEmissionFactors[0], olivedOilEmissionFactor);
   });
   it("should return all factors when there are several factors", async () => {
     await service.saveBulk([olivedOilEmissionFactor, hamEmissionFactor]);
     const carbonEmissionFactors = await service.findAll();
     expect(carbonEmissionFactors).toHaveLength(2);
-    expect(instanceToPlain(carbonEmissionFactors[0])).toEqual(
-      instanceToPlain(olivedOilEmissionFactor),
-    );
-    expect(instanceToPlain(carbonEmissionFactors[1])).toEqual(
-      instanceToPlain(hamEmissionFactor),
-    );
+    expectFactorToMatch(carbonEmissionFactors[0], olivedOilEmissionFactor);
+    expectFactorToMatch(carbonEmissionFactors[1], hamEmissionFactor);
   });
   it("should find a list of factors", async () => {
     await service.saveBulk([olivedOilEmissionFactor, hamEmissionFactor]);
-    const factors = await service.findListByNames({
+    const factors = await service.findSetByNames({
       names: [olivedOilEmissionFactor.name, hamEmissionFactor.name],
     });
     if (!factors) {
       fail("factors should not be null");
     }
-    expect(factors).toHaveLength(2);
-    expect(factors).toContainEqual(instanceToPlain(olivedOilEmissionFactor));
-    expect(factors).toContainEqual(instanceToPlain(hamEmissionFactor));
+    expectFactorsToMatch(factors, [olivedOilEmissionFactor, hamEmissionFactor]);
   });
   it("should return null when failing to find at least one factor", async () => {
     await service.saveBulk([olivedOilEmissionFactor, hamEmissionFactor]);
-    const factors = await service.findListByNames({
+    const factors = await service.findSetByNames({
       names: [olivedOilEmissionFactor.name, "unknown-factor"],
     });
     expect(factors).toBeNull();
@@ -107,15 +127,5 @@ describe("CarbonEmissionFactors.service", () => {
     expect(didDelete).toBe(false);
     const carbonEmissionFactors = await service.findAll();
     expect(carbonEmissionFactors).toHaveLength(3);
-  });
-  it("should update an emission factor", async () => {
-    await service.save(olivedOilEmissionFactor);
-    const retrieved = await service.findByName(olivedOilEmissionFactor);
-    // Just to be sure in case seeder is updated
-    expect(retrieved?.emissionCO2eInKgPerUnit).toEqual(0.15);
-    olivedOilEmissionFactor.emissionCO2eInKgPerUnit = 0.25;
-    await service.save(olivedOilEmissionFactor);
-    const updated = await service.findByName(olivedOilEmissionFactor);
-    expect(updated?.emissionCO2eInKgPerUnit).toEqual(0.25);
   });
 });
