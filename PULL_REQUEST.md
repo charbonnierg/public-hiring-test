@@ -272,6 +272,31 @@ The lifecycle of a calculation is as follows:
 - The polling mechanism is simple to implement and understand. It even supports having multiple workers if needed thanks to `FOR UPDATE SKIP LOCKED` SQL statement.
 - The calculation is done for each ingredient, which allows to have a detailed representation of the carbon footprint of the product (`ReadFootprintScoreDto`).
 
+##### Limitations
+
+The requirement states:
+
+> The Agrybalise carbon footprint of one ingredient is obtained by multiplying the quantity of the ingredient by the emission of a matching emission factor (same name and same unit).
+
+However very few effort have been made to guarantee that the `CarbonEmissionFactor` and `Ingredient` entities are using the same units.
+
+A pure function should be created to convert a factor value with a unit into a target unit. Both factor unit and target unit must be valid unit in the `UnitT` type.
+
+Example: a function `convertFactor` that takes a `CarbonEmissionFactor` entity and an `Ingredient` entity and returns the factor value in the ingredient unit.
+
+
+Assuming that we validate on creation that:
+
+- `CarbonEmissionFactor` entities have a valid unit.
+- `Ingredient` entities have a valid unit.
+- `IngredientQuantity` entities have their quantities transformed into the unit of the ingredient in database.
+
+We can allow carbon emission factors and ingredients to have different units.
+
+However, I'm not sure to understand the need to save units into the database. Assuming that ALL units are weights, and can be converted into `kg`, I would rather have a field in database `quantityInKg` and let my DTO handle any conversion required. This way, there would be no risk of having different units in the database, and it would simplify the computation of the carbon footprint.
+
+As this design would break the existing database schema, I decided not to implement it, and to keep the units in the database, while implementing a "dummy" solution at the moment with clearly identified risks.
+
 ### Developer Tools
 
 - [x] OpenAPI documentation using `@nest/swagger`.
