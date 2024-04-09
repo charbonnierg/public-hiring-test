@@ -170,6 +170,19 @@ This module should also export a `FoodProductService` class for the controller t
   - This controller will allow to create and delete food products.
   - It will also allow to retrieve a food product by its name.
 
+##### Limitations
+
+###### Exception handling
+
+- The `FoodProductController` does not handle exceptions properly. For example, when trying to create a food product with an existing name, the application will crash with a `500` status code. This should be handled properly and return an appropriate status code with a proper error message.
+
+> I have to admit that I'm not very experienced with `NestJS` and I'm not sure what is the best way to handle exceptions in a controller. I have seen that `HttpException` can be thrown, and that's what I did in the `CarbonEmissionFactorController`. However, I'm not sure if this is the best way to handle exceptions in a controller. Also, I'm not sure whether services should throw exceptions or return a result object with an error field. This is something that is strongly impacted by the current practices of the team I guess. 
+
+###### Performance
+
+- The `FoodProductController` is not optimized for performance. Several comments have been added to indicate where the code could be optimized.
+
+
 ### `FootprintScore` module
 
 The `FootprintScore` module has been created to handle the carbon footprint calculation and storage.
@@ -274,6 +287,8 @@ The lifecycle of a calculation is as follows:
 
 ##### Limitations
 
+###### Units conversion
+
 The requirement states:
 
 > The Agrybalise carbon footprint of one ingredient is obtained by multiplying the quantity of the ingredient by the emission of a matching emission factor (same name and same unit).
@@ -296,6 +311,25 @@ We can allow carbon emission factors and ingredients to have different units.
 However, I'm not sure to understand the need to save units into the database. Assuming that ALL units are weights, and can be converted into `kg`, I would rather have a field in database `quantityInKg` and let my DTO handle any conversion required. This way, there would be no risk of having different units in the database, and it would simplify the computation of the carbon footprint.
 
 As this design would break the existing database schema, I decided not to implement it, and to keep the units in the database, while implementing a "dummy" solution at the moment with clearly identified risks.
+
+###### Polling error handling
+
+The error handling is very basic. If the calculation fails, the `status` field of the `PendingFootprintScore` entity is never updated and stays into `pending` state. This is a limitation of the current implementation.
+
+It's not possible to explicitely mark a calculation as `failed` from the worker. This should be implemented.
+
+An additional worker should be implemented to handle the "locked" calculations and update the `status` field to `failed`.
+
+An additional worker should be implemented ot handle the "failed" calculations and update the `status` field to `processing` before either retrying the calculation or deleting the calculation (if it's not desirable to retry).
+
+In total, it means that 3 workers should be implemented:
+
+- Pending to Processing or Failed => Perform the calculation and store the result
+- Processing to Failed => No additional logic, only mark "locked" calculations as "failed"
+- Failed to Processing => Retry the calculation or delete the calculation
+
+With this, the system would be more robust and would handle errors more gracefully.
+
 
 ### Developer Tools
 
