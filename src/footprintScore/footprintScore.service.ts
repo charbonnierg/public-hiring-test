@@ -76,7 +76,7 @@ export class FootprintScoreService implements IFootprintScoreService {
     // We can then get a list of ingredient names
     const ingredientNames = entity.composition.map((c) => c.ingredient.name);
     // And then query a list of factors
-    const factors = await this.carbonEmissionFactorsService.findList({
+    const factors = await this.carbonEmissionFactorsService.findListByNames({
       names: ingredientNames,
     });
     if (!factors) {

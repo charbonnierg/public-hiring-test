@@ -69,7 +69,7 @@ export class CarbonEmissionFactorsController {
     @Param("name") name: string,
   ): Promise<ReadCarbonEmissionFactorDto> {
     this.logger.log(`[GET /${name}] reading factor ${name}`);
-    const factor = await this.carbonEmissionFactorService.find({ name });
+    const factor = await this.carbonEmissionFactorService.findByName({ name });
     if (!factor) {
       this.logger.warn(`[GET /${name}] factor ${name} not found`);
       throw new HttpException(
@@ -94,7 +94,9 @@ export class CarbonEmissionFactorsController {
   })
   async deleteCarbonEmissionFactor(@Param("name") name: string): Promise<void> {
     this.logger.log(`[DELETE /${name}] deleting factor ${name}`);
-    const didDelete = await this.carbonEmissionFactorService.delete({ name });
+    const didDelete = await this.carbonEmissionFactorService.deleteByName({
+      name,
+    });
     if (!didDelete) {
       this.logger.warn(`[DELETE /${name}] factor ${name} not found`);
       throw new HttpException(

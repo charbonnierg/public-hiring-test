@@ -22,7 +22,7 @@ export class CarbonEmissionFactorsService
    * @param query An object with a field `name` to search for.
    * @returns The carbon emission factor if found, null otherwise.
    */
-  find(query: { name: string }): Promise<CarbonEmissionFactor | null> {
+  findByName(query: { name: string }): Promise<CarbonEmissionFactor | null> {
     return this.carbonEmissionFactorRepository.findOne({
       where: { name: query.name },
     });
@@ -34,7 +34,7 @@ export class CarbonEmissionFactorsService
    * @param query An object with a field `names` to search for.
    * @returns The carbon emission factors if all factors are found, null otherwise.
    */
-  async findList(query: {
+  async findListByNames(query: {
     names: string[];
   }): Promise<CarbonEmissionFactor[] | null> {
     const factors = await this.carbonEmissionFactorRepository.findBy({
@@ -96,7 +96,7 @@ export class CarbonEmissionFactorsService
    * @param query An object with a field `name` to search for.
    * @returns `true` if the carbon emission factor was deleted, `false` otherwise.
    */
-  async delete(query: { name: string }): Promise<boolean> {
+  async deleteByName(query: { name: string }): Promise<boolean> {
     const result = await this.carbonEmissionFactorRepository.delete({
       name: query.name,
     });

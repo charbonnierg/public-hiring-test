@@ -70,7 +70,7 @@ describe("CarbonEmissionFactors.service", () => {
   });
   it("should find a list of factors", async () => {
     await service.saveBulk([olivedOilEmissionFactor, hamEmissionFactor]);
-    const factors = await service.findList({
+    const factors = await service.findListByNames({
       names: [olivedOilEmissionFactor.name, hamEmissionFactor.name],
     });
     if (!factors) {
@@ -82,14 +82,14 @@ describe("CarbonEmissionFactors.service", () => {
   });
   it("should return null when failing to find at least one factor", async () => {
     await service.saveBulk([olivedOilEmissionFactor, hamEmissionFactor]);
-    const factors = await service.findList({
+    const factors = await service.findListByNames({
       names: [olivedOilEmissionFactor.name, "unknown-factor"],
     });
     expect(factors).toBeNull();
   });
   it("should delete a factor and return true", async () => {
     await service.save(olivedOilEmissionFactor);
-    const didDelete = await service.delete(olivedOilEmissionFactor);
+    const didDelete = await service.deleteByName(olivedOilEmissionFactor);
     expect(didDelete).toBe(true);
     const carbonEmissionFactors = await service.findAll();
     expect(carbonEmissionFactors).toHaveLength(0);
@@ -100,19 +100,19 @@ describe("CarbonEmissionFactors.service", () => {
       hamEmissionFactor,
       flourEmissionFactor,
     ]);
-    const didDelete = await service.delete({ name: "unknown-factor" });
+    const didDelete = await service.deleteByName({ name: "unknown-factor" });
     expect(didDelete).toBe(false);
     const carbonEmissionFactors = await service.findAll();
     expect(carbonEmissionFactors).toHaveLength(3);
   });
   it("should update an emission factor", async () => {
     await service.save(olivedOilEmissionFactor);
-    const retrieved = await service.find(olivedOilEmissionFactor);
+    const retrieved = await service.findByName(olivedOilEmissionFactor);
     // Just to be sure in case seeder is updated
     expect(retrieved?.emissionCO2eInKgPerUnit).toEqual(0.15);
     olivedOilEmissionFactor.emissionCO2eInKgPerUnit = 0.25;
     await service.save(olivedOilEmissionFactor);
-    const updated = await service.find(olivedOilEmissionFactor);
+    const updated = await service.findByName(olivedOilEmissionFactor);
     expect(updated?.emissionCO2eInKgPerUnit).toEqual(0.25);
   });
 });

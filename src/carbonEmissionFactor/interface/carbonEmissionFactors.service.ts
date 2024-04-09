@@ -27,14 +27,14 @@ export interface ICarbonEmissionFactorService {
    *
    * @param query An object with a property `name` to search for
    */
-  delete(query: { name: string }): Promise<boolean>;
+  deleteByName(query: { name: string }): Promise<boolean>;
 
   /**
    * Find a carbon emission factor by its name.
    *
    * @param query An object with a property `name` to search for
    */
-  find(query: { name: string }): Promise<CarbonEmissionFactor | null>;
+  findByName(query: { name: string }): Promise<CarbonEmissionFactor | null>;
 
   /**
    * Find a list of carbon emission factors by their names.
@@ -44,7 +44,9 @@ export interface ICarbonEmissionFactorService {
    *
    * @param query An object with a property `names` to search for
    */
-  findList(query: { names: string[] }): Promise<CarbonEmissionFactor[] | null>;
+  findListByNames(query: {
+    names: string[];
+  }): Promise<CarbonEmissionFactor[] | null>;
 
   /**
    * Find all carbon emission factors.
