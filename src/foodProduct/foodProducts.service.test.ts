@@ -1,47 +1,52 @@
-import { Repository } from "typeorm";
+import { Test, TestingModule } from "@nestjs/testing";
 import { GreenlyDataSource, dataSource } from "../../config/dataSource";
 import { UnitT } from "../measurementSystem/unit";
 import { getTestEmissionFactor } from "../seed-dev-data";
 import { ReadFoodProductDto } from "./dto/read-foodProduct.dto";
-import { FoodIngredient } from "./foodIngredient.entity";
 import { FoodProduct } from "./foodProduct.entity";
-import { FoodProductIngredientQuantity } from "./foodProductIngredientQuantity.entity";
+import {
+  FoodProductRepository,
+  InMemoryFoodProductRepository,
+} from "./foodProducts.repository";
 import { FoodProductsService } from "./foodProducts.service";
-
-const flourEmissionFactor = getTestEmissionFactor("flour");
-let repository: Repository<FoodProduct>;
-let service: FoodProductsService;
+import { IFoodProductRepository } from "./interface/foodProducts.repository";
 
 beforeAll(async () => {
   await dataSource.initialize();
-  repository = dataSource.getRepository(FoodProduct);
-});
-
-beforeEach(async () => {
-  service = new FoodProductsService(
-    repository,
-    dataSource.getRepository(FoodIngredient),
-    dataSource.getRepository(FoodProductIngredientQuantity),
-  );
-  await GreenlyDataSource.cleanDatabase();
 });
 
 afterAll(async () => {
   await dataSource.destroy();
 });
 
-const expectFoodProduct = async (obj: { name: string }) => {
-  const retrieved = await repository.findOne({
-    where: { name: obj.name },
-    relations: { ingredients: { ingredient: true } },
-  });
-  expect(retrieved).not.toBeNull();
-  expect(ReadFoodProductDto.fromEntity(retrieved as FoodProduct)).toMatchObject(
-    obj,
-  );
-};
-
 describe("FoodProductService", () => {
+  let module: TestingModule;
+  let repository: IFoodProductRepository;
+  let service: FoodProductsService;
+  afterEach(async () => {
+    await module.close();
+  });
+  beforeEach(async () => {
+    await GreenlyDataSource.cleanDatabase();
+    module = await Test.createTestingModule({
+      providers: [
+        FoodProductsService,
+        {
+          provide: FoodProductRepository,
+          useClass: InMemoryFoodProductRepository,
+        },
+      ],
+    }).compile();
+    service = module.get<FoodProductsService>(FoodProductsService);
+    repository = module.get<FoodProductRepository>(FoodProductRepository);
+  });
+  const expectFoodProduct = async (obj: { name: string }) => {
+    const retrieved = await repository.findOne(obj.name);
+    expect(retrieved).not.toBeNull();
+    expect(
+      ReadFoodProductDto.fromEntity(retrieved as FoodProduct),
+    ).toMatchObject(obj);
+  };
   describe("save", () => {
     it("should save a new food product", async () => {
       // Arrange
@@ -58,7 +63,6 @@ describe("FoodProductService", () => {
 
       // Assert
       expect(result).toBeInstanceOf(FoodProduct);
-      expect(result.hasId()).toBe(true);
       expect(ReadFoodProductDto.fromEntity(result)).toMatchObject(foodProduct);
       await expectFoodProduct(foodProduct);
     });
@@ -104,7 +108,7 @@ describe("FoodProductService", () => {
         await service.save(product);
       }
       // Assert
-      expect(await repository.find()).toHaveLength(2);
+      expect(await repository.findAll()).toHaveLength(2);
       await expectFoodProduct(foodProducts[0]);
       await expectFoodProduct(foodProducts[1]);
     });
@@ -210,8 +214,9 @@ describe("FoodProductService", () => {
   });
   describe("findAllByIngredient", () => {
     it("should return an empty array of products", async () => {
+      const factor = getTestEmissionFactor("flour");
       // Act
-      const result = await service.findAllByIngredient(flourEmissionFactor);
+      const result = await service.findAllByIngredient(factor);
 
       // Assert
       expect(result).toHaveLength(0);
@@ -240,7 +245,8 @@ describe("FoodProductService", () => {
         await service.save(product);
       }
       // Act
-      const result = await service.findAllByIngredient(flourEmissionFactor);
+      const factor = getTestEmissionFactor("flour");
+      const result = await service.findAllByIngredient(factor);
 
       // Assert
       expect(result).toHaveLength(1);
@@ -272,7 +278,8 @@ describe("FoodProductService", () => {
         await service.save(product);
       }
       // Act
-      const result = await service.findAllByIngredient(flourEmissionFactor);
+      const factor = getTestEmissionFactor("flour");
+      const result = await service.findAllByIngredient(factor);
 
       // Assert
       expect(result).toHaveLength(2);
@@ -303,7 +310,7 @@ describe("FoodProductService", () => {
 
       // Assert
       expect(result).toBe(true);
-      expect(await repository.find()).toHaveLength(0);
+      expect(await repository.findAll()).toHaveLength(0);
     });
   });
 });

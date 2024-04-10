@@ -6,7 +6,7 @@ import { ICarbonEmissionFactorsRepository } from "./interface/carbonEmissionFact
 /**
  * A thin wrapper around the TypeORM repository for carbon emission factors.
  *
- * This class implements the CarbonEmissionFactorsRepository interface.
+ * This class implements the ICarbonEmissionFactorsRepository interface.
  */
 export class CarbonEmissionFactorsRepository
   implements ICarbonEmissionFactorsRepository

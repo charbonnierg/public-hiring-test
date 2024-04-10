@@ -4,6 +4,7 @@ import { FoodIngredient } from "./foodIngredient.entity";
 import { FoodProduct } from "./foodProduct.entity";
 import { FoodProductIngredientQuantity } from "./foodProductIngredientQuantity.entity";
 import { FoodProductsController } from "./foodProducts.controller";
+import { FoodProductRepository } from "./foodProducts.repository";
 import { FoodProductsService } from "./foodProducts.service";
 
 @Module({
@@ -14,7 +15,7 @@ import { FoodProductsService } from "./foodProducts.service";
       FoodProductIngredientQuantity,
     ]),
   ],
-  providers: [FoodProductsService],
+  providers: [FoodProductsService, FoodProductRepository],
   controllers: [FoodProductsController],
   exports: [FoodProductsService],
 })
