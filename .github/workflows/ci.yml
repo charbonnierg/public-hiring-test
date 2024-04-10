@@ -1,0 +1,44 @@
+name: Continuous Integration
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: [main]
+
+env:
+  DATABASE_HOST: postgres
+  DATABASE_TEST_PORT: 5432
+  DATABASE_USERNAME: user
+  DATABASE_PASSWORD: pwd
+  DATABASE_NAME: database
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: ${{ env.DATABASE_USERNAME }}
+          POSTGRES_PASSWORD: ${{ env.DATABASE_PASSWORD }}
+          POSTGRES_DB: ${{ env.DATABASE_NAME }}
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18.x"
+      - run: yarn --frozen-lockfile
+      - run: yarn format:check
+      - run: yarn lint:check
+      - run: yarn test:covall --verbose
+      - run: yarn build

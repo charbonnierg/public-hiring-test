@@ -7,6 +7,7 @@ dotenvConfig({ path: ".env" });
 
 const dataSourceOptions: DataSourceOptions = {
   type: "postgres",
+  host: process.env.DATABASE_HOST,
   port: parseInt(
     `${process.env.NODE_ENV === "test" ? process.env.DATABASE_TEST_PORT : process.env.DATABASE_PORT}`,
   ),
