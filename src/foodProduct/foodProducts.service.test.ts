@@ -115,6 +115,35 @@ describe("FoodProductService", () => {
       // Assert
       await expect(result).rejects.toThrow();
     });
+    it("should convert ingredient quantity when ingredient already exists with different unit", async () => {
+      // Arrange
+      const foodProductInKg = {
+        name: "Pizza",
+        ingredients: [
+          { name: "flour", unit: "kg" as UnitT, quantity: 0.1 },
+          { name: "ham", unit: "kg" as UnitT, quantity: 0.2 },
+          { name: "olive oil", unit: "kg" as UnitT, quantity: 0.1 },
+        ],
+      };
+      await service.save(foodProductInKg);
+      const foodProductInG = {
+        name: "The same pizza",
+        ingredients: [
+          { name: "flour", unit: "g" as UnitT, quantity: 100 },
+          { name: "ham", unit: "g" as UnitT, quantity: 200 },
+          { name: "olive oil", unit: "g" as UnitT, quantity: 100 },
+        ],
+      };
+      // Act
+      await service.save(foodProductInG);
+
+      // Assert
+      const retrieved = await repository.findOne(foodProductInG.name);
+      expect(retrieved).toMatchObject({
+        ...foodProductInKg,
+        name: foodProductInG.name,
+      });
+    });
     it("should create many products with overlapping ingredients", async () => {
       // Arrange
       const foodProducts = [
