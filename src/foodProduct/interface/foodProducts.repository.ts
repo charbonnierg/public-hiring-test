@@ -1,6 +1,11 @@
 import { UnitT } from "../../measurementSystem/unit";
 import { FoodProduct } from "../foodProduct.entity";
 
+export interface Indice {
+  columns: string[];
+  unique: boolean;
+}
+
 export interface IFoodProduct {
   name: string;
   ingredients: { name: string; unit: UnitT; quantity: number }[];
@@ -24,7 +29,7 @@ export interface IFoodProductRepository {
    *
    * @returns All food products.
    */
-  findAll: () => Promise<FoodProduct[]>;
+  find: () => Promise<FoodProduct[]>;
 
   /**
    * Find all food products that contain a given ingredient.
@@ -34,7 +39,7 @@ export interface IFoodProductRepository {
    * @param ingredientName The name of the ingredient to search for.
    * @returns All food products that contain the given ingredient.
    */
-  findAllByIngredient: (ingredientName: string) => Promise<FoodProduct[]>;
+  findByIngredient: (ingredientName: string) => Promise<FoodProduct[]>;
 
   /**
    * Delete a food product by name.
@@ -42,7 +47,7 @@ export interface IFoodProductRepository {
    * @param name The name of the food product to delete.
    * @returns `true` if the food product was deleted, `false` otherwise.
    */
-  delete: (name: string) => Promise<boolean>;
+  deleteOne: (name: string) => Promise<boolean>;
 
   /**
    * Save a food product.
@@ -50,5 +55,11 @@ export interface IFoodProductRepository {
    * @param props The properties of the food product to save.
    * @returns The saved food product.
    */
-  save: (props: IFoodProduct) => Promise<FoodProduct>;
+  saveOne: (props: IFoodProduct) => Promise<FoodProduct>;
+
+  /**
+   * Get all indices on the underlying table.
+   * Mainly used for testing.
+   */
+  indices: () => Promise<Record<string, Indice[]>>;
 }

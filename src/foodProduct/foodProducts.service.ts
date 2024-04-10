@@ -14,7 +14,7 @@ export class FoodProductsService implements IFoodProductsService {
     name: string;
     ingredients: { name: string; unit: UnitT; quantity: number }[];
   }): Promise<FoodProduct> {
-    return this.foodProductRepo.save(props);
+    return this.foodProductRepo.saveOne(props);
   }
 
   find(query: { name: string }): Promise<FoodProduct | null> {
@@ -22,14 +22,14 @@ export class FoodProductsService implements IFoodProductsService {
   }
 
   findAll(): Promise<FoodProduct[]> {
-    return this.foodProductRepo.findAll();
+    return this.foodProductRepo.find();
   }
 
   findAllByIngredient(query: { name: string }): Promise<FoodProduct[]> {
-    return this.foodProductRepo.findAllByIngredient(query.name);
+    return this.foodProductRepo.findByIngredient(query.name);
   }
 
   async delete(query: { name: string }): Promise<boolean> {
-    return this.foodProductRepo.delete(query.name);
+    return this.foodProductRepo.deleteOne(query.name);
   }
 }

@@ -108,7 +108,7 @@ describe("FoodProductService", () => {
         await service.save(product);
       }
       // Assert
-      expect(await repository.findAll()).toHaveLength(2);
+      expect(await repository.find()).toHaveLength(2);
       await expectFoodProduct(foodProducts[0]);
       await expectFoodProduct(foodProducts[1]);
     });
@@ -310,7 +310,7 @@ describe("FoodProductService", () => {
 
       // Assert
       expect(result).toBe(true);
-      expect(await repository.findAll()).toHaveLength(0);
+      expect(await repository.find()).toHaveLength(0);
     });
   });
 });

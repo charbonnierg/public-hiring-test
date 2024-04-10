@@ -29,7 +29,7 @@ export class FoodProductRepository implements IFoodProductRepository {
    * @param name The name of the food product to delete.
    * @returns The result of the deletion operation.
    */
-  async delete(name: string) {
+  async deleteOne(name: string) {
     const result = await this.foodProductRepository.delete({ name });
     // Postgres supports this
     const affectedRows = result.affected as number;
@@ -62,7 +62,7 @@ export class FoodProductRepository implements IFoodProductRepository {
    *
    * @returns All food products.
    */
-  findAll() {
+  find() {
     return this.foodProductRepository.find({
       relations: {
         ingredients: {
@@ -80,7 +80,7 @@ export class FoodProductRepository implements IFoodProductRepository {
    * @param ingredientName The name of the ingredient to search for.
    * @returns All food products that contain the given ingredient.
    */
-  findAllByIngredient(ingredientName: string) {
+  findByIngredient(ingredientName: string) {
     return this.foodProductRepository.find({
       where: {
         ingredients: {
@@ -103,7 +103,7 @@ export class FoodProductRepository implements IFoodProductRepository {
    * @param props The properties of the food product to save.
    * @returns The saved food product.
    */
-  async save(props: IFoodProduct) {
+  async saveOne(props: IFoodProduct) {
     // FIXME: Use a transaction
     const product = new FoodProduct();
     product.name = props.name;
@@ -139,6 +139,26 @@ export class FoodProductRepository implements IFoodProductRepository {
     }
     return product;
   }
+
+  async indices() {
+    return {
+      [this.foodProductRepository.metadata.tableNameWithoutPrefix]:
+        this.foodProductRepository.metadata.indices.map((i) => ({
+          columns: i.columns.map((c) => c.databaseNameWithoutPrefixes),
+          unique: i.isUnique,
+        })),
+      [this.ingredientRepository.metadata.tableNameWithoutPrefix]:
+        this.ingredientRepository.metadata.indices.map((i) => ({
+          columns: i.columns.map((c) => c.databaseNameWithoutPrefixes),
+          unique: i.isUnique,
+        })),
+      [this.ingredientQuantityRepository.metadata.tableNameWithoutPrefix]:
+        this.ingredientQuantityRepository.metadata.indices.map((i) => ({
+          columns: i.columns.map((c) => c.databaseNameWithoutPrefixes),
+          unique: i.isUnique,
+        })),
+    };
+  }
 }
 
 /**
@@ -149,7 +169,7 @@ export class FoodProductRepository implements IFoodProductRepository {
 export class InMemoryFoodProductRepository implements IFoodProductRepository {
   constructor(private products: FoodProduct[] = []) {}
 
-  async delete(name: string) {
+  async deleteOne(name: string) {
     const index = this.products.findIndex((product) => product.name === name);
     if (index === -1) {
       return false;
@@ -162,11 +182,11 @@ export class InMemoryFoodProductRepository implements IFoodProductRepository {
     return this.products.find((product) => product.name === name) ?? null;
   }
 
-  async findAll() {
+  async find() {
     return this.products;
   }
 
-  async findAllByIngredient(ingredientName: string) {
+  async findByIngredient(ingredientName: string) {
     return this.products.filter((product) =>
       product.ingredients.some(
         (ingredient) => ingredient.ingredient.name === ingredientName,
@@ -174,7 +194,7 @@ export class InMemoryFoodProductRepository implements IFoodProductRepository {
     );
   }
 
-  async save(props: IFoodProduct) {
+  async saveOne(props: IFoodProduct) {
     const existing = this.products.find(
       (existingProduct) => existingProduct.name === props.name,
     );
@@ -195,5 +215,14 @@ export class InMemoryFoodProductRepository implements IFoodProductRepository {
     }
     this.products.push(product);
     return product;
+  }
+
+  async indices() {
+    // Fake values
+    return {
+      food_product: [{ columns: ["name"], unique: true }],
+      food_ingredient: [{ columns: ["name"], unique: true }],
+      food_product_ingredient_quantity: [],
+    };
   }
 }
