@@ -73,24 +73,7 @@ export class CarbonFootprintService implements ICarbonFootprintService {
   async getFootprintForProduct(
     product: string,
   ): Promise<CarbonFootprintContribution[] | null> {
-    // TODO: Do not query product first but use a single SQL query
-    // using product name.
-
-    // First find the product
-    const entity = await this.foodProductsService.find({ name: product });
-    if (!entity) {
-      return null;
-    }
-    // Then find the contributions for the product ingredients
-    const contributions =
-      await this.carbonFootprintRepository.findContributions(
-        entity.ingredients.map((i) => i.id),
-      );
-    // This should never happen, but let's be safe
-    if (contributions.length !== entity.ingredients.length) {
-      throw new Error("Missing contributions for some ingredients");
-    }
-    return contributions;
+    return this.carbonFootprintRepository.findContributions(product);
   }
 
   /**
@@ -102,9 +85,7 @@ export class CarbonFootprintService implements ICarbonFootprintService {
   private async clearContributionsForProduct(
     product: FoodProduct,
   ): Promise<null> {
-    await this.carbonFootprintRepository.deleteContributions(
-      product.ingredients.map((i) => i.id),
-    );
+    await this.carbonFootprintRepository.deleteContributions(product.name);
     return null;
   }
 }

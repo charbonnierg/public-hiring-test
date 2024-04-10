@@ -2,12 +2,12 @@ import { CarbonFootprintContribution } from "../carbonFootprintContribution.enti
 
 export interface ICarbonFootprintRepository {
   findContributions: (
-    foodIngredientQuantityIds: number[],
+    product: string,
   ) => Promise<CarbonFootprintContribution[]>;
 
   saveContributions: (
     contributions: CarbonFootprintContribution[],
   ) => Promise<CarbonFootprintContribution[]>;
 
-  deleteContributions: (foodIngredientQuantityIds: number[]) => Promise<void>;
+  deleteContributions: (product: string) => Promise<number>;
 }
