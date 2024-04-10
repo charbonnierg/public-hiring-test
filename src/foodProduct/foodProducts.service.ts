@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { UnitT } from "../measurementSystem/unit";
+import { UnitT, validateUnitOrReject } from "../measurementSystem/unit";
 import { FoodProduct } from "./foodProduct.entity";
 import { FoodProductRepository } from "./foodProducts.repository";
 import { IFoodProductsService } from "./interface/foodProducts.service";
@@ -14,6 +14,16 @@ export class FoodProductsService implements IFoodProductsService {
     name: string;
     ingredients: { name: string; unit: UnitT; quantity: number }[];
   }): Promise<FoodProduct> {
+    const composition = new Set() as Set<string>;
+    props.ingredients.forEach((ingredient) => {
+      if (composition.has(ingredient.name)) {
+        throw new Error(
+          `Ingredient ${ingredient.name} is duplicated in the composition.`,
+        );
+      }
+      validateUnitOrReject(ingredient.unit);
+      composition.add(ingredient.name);
+    });
     return this.foodProductRepo.saveOne(props);
   }
 

@@ -83,6 +83,38 @@ describe("FoodProductService", () => {
       // Assert
       await expect(result).rejects.toThrow();
     });
+    it("should refuse to save a food product with invalid ingredient units", async () => {
+      // Arrange
+      const foodProduct = {
+        name: "Pizza",
+        ingredients: [
+          { name: "flour", unit: "kg" as UnitT, quantity: 0.1 },
+          { name: "ham", unit: "kg" as UnitT, quantity: 0.2 },
+          { name: "olive oil", unit: "INVALID" as UnitT, quantity: 100 },
+        ],
+      };
+      // Act
+      const result = service.save(foodProduct);
+
+      // Assert
+      await expect(result).rejects.toThrow();
+    });
+    it("should refuse to create a food product with same ingredient twice", async () => {
+      // Arrange
+      const foodProduct = {
+        name: "Pizza",
+        ingredients: [
+          { name: "flour", unit: "kg" as UnitT, quantity: 0.1 },
+          { name: "flour", unit: "kg" as UnitT, quantity: 0.2 },
+          { name: "olive oil", unit: "kg" as UnitT, quantity: 0.1 },
+        ],
+      };
+      // Act
+      const result = service.save(foodProduct);
+
+      // Assert
+      await expect(result).rejects.toThrow();
+    });
     it("should create many products with overlapping ingredients", async () => {
       // Arrange
       const foodProducts = [
