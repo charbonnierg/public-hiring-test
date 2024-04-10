@@ -40,4 +40,9 @@ jobs:
       - run: yarn format:check
       - run: yarn lint:check
       - run: yarn test:covall --verbose
-      - run: yarn build
+      - run: yarn html-coverage
+      - name: Archive code coverage results
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage-report
+          path: coverage/html
