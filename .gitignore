@@ -6,3 +6,5 @@ src/coverage
 !.vscode/extensions.json
 !.vscode/launch.json
 /documentation
+/coverage
+.nyc_output

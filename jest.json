@@ -7,5 +7,12 @@
   "testPathIgnorePatterns": ["e2e-test"],
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
-  }
+  },
+  "collectCoverageFrom": [
+    "**/*.(t|j)s",
+    "!**/node_modules/**",
+    "!**/migrations/**"
+  ],
+  "coverageDirectory": "../coverage",
+  "coverageReporters": ["json", "text-summary"]
 }
