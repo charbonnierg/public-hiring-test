@@ -45,16 +45,23 @@ export class CarbonFootprintService implements ICarbonFootprintService {
     const entity = await this.foodProductsService.find({ name: product });
     // If the product does not exist, we return null
     if (!entity) return null;
-    // And then query a list of factors
-    const factors = await this.carbonEmissionFactorsService.findSetByNames({
-      names: entity.ingredients.map((c) => c.ingredient.name),
-    });
+    // We need the list of ingredients
+    const ingredients = entity.ingredients.map((c) => c.ingredient.name);
+    // And then query a list of factors. If any factor is missing, factors will be null
+    const factors =
+      await this.carbonEmissionFactorsService.findAllByNamesOrNothing({
+        names: ingredients,
+      });
     // If factors are missing, we clear the contributions and return null
-    if (!factors) return await this.clearContributionsForProduct(entity);
+    if (!factors) return this.clearContributionsForProduct(entity);
     // Let's build the array of contributions
     const contributions = computeFootprintForProductAndFactors(entity, factors);
     // If contributions are missing, we clear the contributions and return null
-    return contributions || (await this.clearContributionsForProduct(entity));
+    if (!contributions) return this.clearContributionsForProduct(entity);
+    // Otherwise, we save the contributions
+    return await this.carbonFootprintRepository.saveContributions(
+      contributions,
+    );
   }
 
   /**

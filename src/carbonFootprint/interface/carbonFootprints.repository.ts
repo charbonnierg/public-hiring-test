@@ -7,7 +7,7 @@ export interface ICarbonFootprintRepository {
 
   saveContributions: (
     contributions: CarbonFootprintContribution[],
-  ) => Promise<void>;
+  ) => Promise<CarbonFootprintContribution[]>;
 
   deleteContributions: (foodIngredientQuantityIds: number[]) => Promise<void>;
 }

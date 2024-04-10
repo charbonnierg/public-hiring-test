@@ -85,7 +85,7 @@ Some of the changes are breaking changes and will require changes in the client 
   - This method will allow to search for a `CarbonEmissionFactor` entity by its name.
   - If the name is not found, the method will return `null`. This is a design choice, it could be changed to throw an error instead.
 
-- 🎁 Add a `findSetByNames` method:
+- 🎁 Add a `findAllByNamesOrNothing` method:
   - This method will allow to search for a set of `CarbonEmissionFactor` entities by their names.
   - If any of the names is not found, the method will return `null`. This is a design choice, it could be changed to throw an error instead.
 

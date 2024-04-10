@@ -95,7 +95,7 @@ describe("CarbonEmissionFactors.service", () => {
   });
   it("should find a list of factors", async () => {
     await service.saveBulk([olivedOilEmissionFactor, hamEmissionFactor]);
-    const factors = await service.findSetByNames({
+    const factors = await service.findAllByNamesOrNothing({
       names: [olivedOilEmissionFactor.name, hamEmissionFactor.name],
     });
     if (!factors) {
@@ -105,7 +105,7 @@ describe("CarbonEmissionFactors.service", () => {
   });
   it("should return null when failing to find at least one factor", async () => {
     await service.saveBulk([olivedOilEmissionFactor, hamEmissionFactor]);
-    const factors = await service.findSetByNames({
+    const factors = await service.findAllByNamesOrNothing({
       names: [olivedOilEmissionFactor.name, "unknown-factor"],
     });
     expect(factors).toBeNull();

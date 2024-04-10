@@ -27,6 +27,6 @@ export class CarbonFootprintRepository implements ICarbonFootprintRepository {
   }
 
   async saveContributions(contributions: CarbonFootprintContribution[]) {
-    this.footprintScoreRepository.save(contributions);
+    return this.footprintScoreRepository.save(contributions);
   }
 }
