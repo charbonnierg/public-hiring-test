@@ -139,7 +139,10 @@ describe("FoodProductService", () => {
 
       // Assert
       const retrieved = await repository.findOne(foodProductInG.name);
-      expect(retrieved).toMatchObject({
+      expect(retrieved).not.toBeNull();
+      expect(
+        ReadFoodProductDto.fromEntity(retrieved as FoodProduct),
+      ).toMatchObject({
         ...foodProductInKg,
         name: foodProductInG.name,
       });

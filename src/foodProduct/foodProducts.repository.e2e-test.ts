@@ -303,6 +303,65 @@ describe("FoodProduct.repository", () => {
           });
         });
       });
+      describe("findIngredients", () => {
+        it("should return an empty array if there is no ingredient", async () => {
+          const ingredients = await repository.findIngredients([
+            "ham",
+            "flour",
+          ]);
+          expect(ingredients).toEqual({});
+        });
+        it("should return a single ingredient if a single ingredient matches", async () => {
+          const product = {
+            name: "Pizza",
+            ingredients: [
+              {
+                name: "flour",
+                quantity: 100,
+                unit: "g" as UnitT,
+              },
+              {
+                name: "ham",
+                quantity: 50,
+                unit: "g" as UnitT,
+              },
+            ],
+          };
+          await repository.saveOne(product);
+          const ingredients = await repository.findIngredients(["ham"]);
+          expect(Object.keys(ingredients).length).toEqual(1);
+          expect(ingredients).toMatchObject({
+            ham: { name: "ham", unit: "g" },
+          });
+        });
+        it("should return all ingredients if all matches", async () => {
+          const product = {
+            name: "Pizza",
+            ingredients: [
+              {
+                name: "flour",
+                quantity: 100,
+                unit: "g" as UnitT,
+              },
+              {
+                name: "ham",
+                quantity: 50,
+                unit: "g" as UnitT,
+              },
+            ],
+          };
+          await repository.saveOne(product);
+          const ingredients = await repository.findIngredients([
+            "ham",
+            "flour",
+          ]);
+          expect(Object.keys(ingredients).length).toEqual(2);
+          expect(ingredients).toMatchObject({
+            flour: { name: "flour", unit: "g" },
+            ham: { name: "ham", unit: "g" },
+          });
+        });
+      });
       describe("deleteOne", () => {
         it("should return false if the carbon emission factor does not exist", async () => {
           const didDelete = await repository.deleteOne("non-existing");

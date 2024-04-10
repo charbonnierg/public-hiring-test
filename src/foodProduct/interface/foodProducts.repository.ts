@@ -1,4 +1,5 @@
 import { UnitT } from "../../measurementSystem/unit";
+import { FoodIngredient } from "../foodIngredient.entity";
 import { FoodProduct } from "../foodProduct.entity";
 
 export interface Indice {
@@ -40,6 +41,15 @@ export interface IFoodProductRepository {
    * @returns All food products that contain the given ingredient.
    */
   findByIngredient: (ingredientName: string) => Promise<FoodProduct[]>;
+
+  /**
+   * Find a record of ingredients by name.
+   *
+   * @param names A list of ingredient names to search for.
+   * @returns A map of ingredient names to their corresponding FoodIngredient instances.
+   *        If an ingredient is not found, it is not included in the map.
+   */
+  findIngredients: (names: string[]) => Promise<Record<string, FoodIngredient>>;
 
   /**
    * Delete a food product by name.

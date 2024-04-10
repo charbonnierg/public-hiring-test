@@ -1,5 +1,9 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { UnitT, validateUnitOrReject } from "../measurementSystem/unit";
+import {
+  UnitT,
+  convertUnit,
+  validateUnitOrReject,
+} from "../measurementSystem/unit";
 import { FoodProduct } from "./foodProduct.entity";
 import { FoodProductRepository } from "./foodProducts.repository";
 import { IFoodProductsService } from "./interface/foodProducts.service";
@@ -23,6 +27,25 @@ export class FoodProductsService implements IFoodProductsService {
       }
       validateUnitOrReject(ingredient.unit);
       composition.add(ingredient.name);
+    });
+    const ingredientsMap = await this.foodProductRepo.findIngredients(
+      Array.from(composition),
+    );
+    props.ingredients.forEach((ingredient) => {
+      const existing = ingredientsMap[ingredient.name];
+      if (!existing) {
+        return;
+      }
+      if (existing.unit !== ingredient.unit) {
+        const newQuantity = convertUnit(
+          ingredient.quantity,
+          ingredient.unit,
+          existing.unit,
+        );
+        ingredient.quantity = newQuantity;
+        ingredient.unit = existing.unit;
+      }
+      return;
     });
     return this.foodProductRepo.saveOne(props);
   }

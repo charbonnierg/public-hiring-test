@@ -1,5 +1,5 @@
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { In, Repository } from "typeorm";
 import { FoodIngredient } from "./foodIngredient.entity";
 import { FoodProduct } from "./foodProduct.entity";
 import { FoodProductIngredientQuantity } from "./foodProductIngredientQuantity.entity";
@@ -98,6 +98,26 @@ export class FoodProductRepository implements IFoodProductRepository {
   }
 
   /**
+   * Find a record of ingredients by name.
+   *
+   * @param names A list of ingredient names to search for.
+   * @returns A map of ingredient names to their corresponding FoodIngredient instances.
+   *        If an ingredient is not found, it is not included in the map.
+   */
+  async findIngredients(names: string[]) {
+    const results = await this.ingredientRepository.find({
+      where: { name: In(names) },
+    });
+    return results.reduce(
+      (acc, ingredient) => {
+        acc[ingredient.name] = ingredient;
+        return acc;
+      },
+      {} as Record<string, FoodIngredient>,
+    );
+  }
+
+  /**
    * Save a food product.
    *
    * @param props The properties of the food product to save.
@@ -192,6 +212,17 @@ export class InMemoryFoodProductRepository implements IFoodProductRepository {
         (ingredient) => ingredient.ingredient.name === ingredientName,
       ),
     );
+  }
+
+  async findIngredients(names: string[]) {
+    const ingredients = {} as Record<string, FoodIngredient>;
+    for (const product of this.products) {
+      for (const ingredient of product.ingredients) {
+        if (!names.includes(ingredient.ingredient.name)) continue;
+        ingredients[ingredient.ingredient.name] = ingredient.ingredient;
+      }
+    }
+    return ingredients;
   }
 
   async saveOne(props: IFoodProduct) {
