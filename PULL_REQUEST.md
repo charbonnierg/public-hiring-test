@@ -152,7 +152,6 @@ This module should also export a `FoodProductService` class for the controller t
 
 - 🎁 Introduce a new entity `FoodIngredient`:
   - This entity has a `name` and a `unit`.
-  - `unit` validation is very basic. It should be improved in the future.
 
 #### `FoodProductIngredientQuantity` entity
 
@@ -174,6 +173,8 @@ This module should also export a `FoodProductService` class for the controller t
 
 - At the moment, the service is not really "unit tested" in a sense that it depends on the `TypeORM` repository. This is not a good practice IMO, but I'm not sure what are the best practices here.
 
+EDIT 2: The `FoodProductService` is now unit testable. It uses an `IFoodProductRepository` interface that can be stubbed in tests. Also, in order to make sure that stub implementation is correct, and to make sure that the TypeORM implementation is correct, an end-to-end test has been added to test the `FoodProductModule`.
+
 ###### Exception handling
 
 - The `FoodProductService` does not handle exceptions throwned by `TypeORM`. I'm not sure what is the best way to handle exceptions in a service. I don't think we should throw HTTP exceptions, so maybe we should create our custom exception classes and throw them. The controllers would then be responsible for catching these exceptions and returning the appropriate HTTP status code. 
@@ -183,6 +184,9 @@ This module should also export a `FoodProductService` class for the controller t
 - When asking to create a product with an ingredient expressed in a different unit than an existing product with same ingredient, the application will crash with a `500` status code. This is due to the fact that the application does not handle units conversion properly, and will try to create a new ingredient with the same name but a different unit, and there is a unique constraint on the `name` field in the `FoodIngredient` entity.
 
   - This is intentionally left out as I'm not sure whether the units should exist in the database schema, e.g, why not a column `quantityInKg` ? If for any reason we must store the unit in database, then we should have a function to convert the quantity of an ingredient in the unit of the ingredient in the database, and tests for that too.
+
+
+EDIT 2: There are now the functions `validateUnitOrReject` and `convertUnit` which can be used for such purpose. Both `CarbonEmissionFactorModule` and `FoodProductModule` make use of those functions to either validate or convert units before saving the entities in the database.
 
 #### `FoodProductController`
 
@@ -399,12 +403,14 @@ One major downside is that tests rely on a lot on infrastructure. Developers mor
 
 EDIT: Some efforts have been made in order to make the `CarbonEmissionFactorModule` more testable. The `CarbonEmissionFactorService` now uses an interface `ICarbonEmissionFactorRepository` that can be stubbed in tests. This is a good practice to avoid relying on the `TypeORM` repository in the tests. Also, in order to make sure that stub implementation is correct, and to make sure that the TypeORM implementation is correct, an end-to-end test has been added to test the `CarbonEmissionFactorModule`.
 
+EDIT 2: The `FoodProductModule` is now unit testable. It uses a `IFoodProductRepository` interface that can be stubbed in tests. Also, in order to make sure that stub implementation is correct, and to make sure that the TypeORM implementation is correct, an end-to-end test has been added to test the `FoodProductModule`.
+
 ## Further work
 
 The following tasks are still pending:
 
 - [ ] Provide unit test for `CarbonFootprintService` and the `PendingCarbonFootprintService`.
-- [ ] Provide a robust implementation to handle unit conversion.
+- [x] Provide a robust implementation to handle unit conversion.
 - [ ] Provide a way to compute coverage which includes the e2e tests.
 - [ ] Provide a GitHub action to run the tests on PRs.
 - [ ] Provide a pre-commit hook to format the code with prettier and type checking before commiting.
