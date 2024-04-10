@@ -8,11 +8,8 @@ import {
   MinLength,
   validateOrReject,
 } from "class-validator";
-import {
-  CarbonEmissionFactor,
-  UnitT,
-  Units,
-} from "../carbonEmissionFactor.entity";
+import { UnitT, Units } from "../../measurementSystem/unit";
+import { CarbonEmissionFactor } from "../carbonEmissionFactor.entity";
 
 /**
  * Data transfer object for creating a carbon emission factor.

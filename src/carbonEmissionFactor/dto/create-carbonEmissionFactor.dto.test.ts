@@ -1,4 +1,4 @@
-import { Units } from "../carbonEmissionFactor.entity";
+import { Units } from "../../measurementSystem/unit";
 import { CreateCarbonEmissionFactorDto } from "./create-carbonEmissionFactor.dto";
 
 describe("CreateCarbonEmissionFactorDto", () => {
@@ -102,7 +102,7 @@ describe("CreateCarbonEmissionFactorDto", () => {
         expect(err).toMatchObject([
           {
             constraints: {
-              isIn: "unit must be one of the following values: kg, oz",
+              isIn: "unit must be one of the following values: mg, g, kg, oz, cup, ml, cl, l",
             },
             property: "unit",
           },
@@ -123,7 +123,7 @@ describe("CreateCarbonEmissionFactorDto", () => {
         expect(err).toMatchObject([
           {
             constraints: {
-              isIn: "unit must be one of the following values: kg, oz",
+              isIn: "unit must be one of the following values: mg, g, kg, oz, cup, ml, cl, l",
             },
             property: "unit",
           },

@@ -10,7 +10,7 @@ import {
   ValidateNested,
   validateOrReject,
 } from "class-validator";
-import { Units } from "../../carbonEmissionFactor/carbonEmissionFactor.entity";
+import { UnitT, Units } from "../../measurementSystem/unit";
 
 /**
  * Data transfer object for an ingredient quantity
@@ -24,7 +24,7 @@ export class CreateIngredientQuantityDto {
   @IsString()
   @IsIn(Units)
   @ApiProperty()
-  unit: string;
+  unit: UnitT;
 
   @ApiProperty()
   @IsNumber()

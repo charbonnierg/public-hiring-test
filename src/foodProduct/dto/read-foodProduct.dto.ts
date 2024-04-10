@@ -1,6 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Exclude, Expose } from "class-transformer";
 import { IsNumber, IsString } from "class-validator";
+import { UnitT } from "../../measurementSystem/unit";
 import { FoodIngredient } from "../foodIngredient.entity";
 import { FoodProduct } from "../foodProduct.entity";
 import { FoodProductIngredientQuantity } from "../foodProductIngredientQuantity.entity";
@@ -18,7 +19,7 @@ export class ReadIngredientQuantityDto {
   @Expose()
   @IsString()
   @ApiProperty()
-  unit: string;
+  unit: UnitT;
 
   @Expose()
   @IsNumber()

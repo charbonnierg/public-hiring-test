@@ -226,7 +226,9 @@ describe("CarbonEmissionFactorsController", () => {
         .expect(({ body }) => {
           expect(body).toEqual({
             error: "Bad Request",
-            message: ["unit must be one of the following values: kg, oz"],
+            message: [
+              "unit must be one of the following values: mg, g, kg, oz, cup, ml, cl, l",
+            ],
             statusCode: 400,
           });
         });
@@ -245,7 +247,9 @@ describe("CarbonEmissionFactorsController", () => {
         .expect(({ body }) => {
           expect(body).toEqual({
             error: "Bad Request",
-            message: ["unit must be one of the following values: kg, oz"],
+            message: [
+              "unit must be one of the following values: mg, g, kg, oz, cup, ml, cl, l",
+            ],
             statusCode: 400,
           });
         });
@@ -398,7 +402,9 @@ describe("CarbonEmissionFactorsController", () => {
         .expect(({ body }) => {
           expect(body).toEqual({
             error: "Bad Request",
-            message: ["unit must be one of the following values: kg, oz"],
+            message: [
+              "unit must be one of the following values: mg, g, kg, oz, cup, ml, cl, l",
+            ],
             statusCode: 400,
           });
         });
@@ -423,7 +429,9 @@ describe("CarbonEmissionFactorsController", () => {
         .expect(({ body }) => {
           expect(body).toEqual({
             error: "Bad Request",
-            message: ["unit must be one of the following values: kg, oz"],
+            message: [
+              "unit must be one of the following values: mg, g, kg, oz, cup, ml, cl, l",
+            ],
             statusCode: 400,
           });
         });

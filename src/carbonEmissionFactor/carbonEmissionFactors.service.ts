@@ -1,4 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
+import { validateUnitOrReject } from "../measurementSystem/unit";
 import { CarbonEmissionFactor } from "./carbonEmissionFactor.entity";
 import { CarbonEmissionFactorsRepository } from "./carbonEmissionFactors.repository";
 import { ICarbonEmissionFactorsRepository } from "./interface/carbonEmissionFactors.repository";
@@ -60,6 +61,8 @@ export class CarbonEmissionFactorsService
   async save(
     carbonEmissionFactor: CarbonEmissionFactor,
   ): Promise<CarbonEmissionFactor> {
+    // Make sure unit is valid
+    validateUnitOrReject(carbonEmissionFactor.unit);
     const result =
       this.carbonEmissionFactorRepository.saveOne(carbonEmissionFactor);
     if (!result) {
@@ -77,6 +80,10 @@ export class CarbonEmissionFactorsService
   async saveBulk(
     carbonEmissionFactors: CarbonEmissionFactor[],
   ): Promise<CarbonEmissionFactor[]> {
+    // Make sure units are valid
+    carbonEmissionFactors.forEach((factor) =>
+      validateUnitOrReject(factor.unit),
+    );
     const result = this.carbonEmissionFactorRepository.saveMany(
       carbonEmissionFactors,
     );

@@ -5,10 +5,7 @@ import {
   Index,
   PrimaryGeneratedColumn,
 } from "typeorm";
-
-export const Units = ["kg", "oz"] as const;
-
-export type UnitT = (typeof Units)[number];
+import { UnitT } from "../measurementSystem/unit";
 
 /**
  * Entity for carbon emission factors.

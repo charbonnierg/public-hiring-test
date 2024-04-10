@@ -1,6 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Exclude, Expose, plainToInstance } from "class-transformer";
 import { IsNumber, IsString } from "class-validator";
+import { UnitT } from "../../measurementSystem/unit";
 import { CarbonEmissionFactor } from "../carbonEmissionFactor.entity";
 
 /**
@@ -16,7 +17,7 @@ export class ReadCarbonEmissionFactorDto {
   @Expose()
   @IsString()
   @ApiProperty()
-  unit: string;
+  unit: UnitT;
 
   @Expose()
   @IsNumber()

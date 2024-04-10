@@ -1,5 +1,6 @@
 import { Repository } from "typeorm";
 import { GreenlyDataSource, dataSource } from "../../config/dataSource";
+import { UnitT } from "../measurementSystem/unit";
 import { getTestEmissionFactor } from "../seed-dev-data";
 import { ReadFoodProductDto } from "./dto/read-foodProduct.dto";
 import { FoodIngredient } from "./foodIngredient.entity";
@@ -47,9 +48,9 @@ describe("FoodProductService", () => {
       const foodProduct = {
         name: "Pizza",
         ingredients: [
-          { name: "flour", unit: "kg", quantity: 0.1 },
-          { name: "ham", unit: "kg", quantity: 0.2 },
-          { name: "olive oil", unit: "kg", quantity: 0.1 },
+          { name: "flour", unit: "kg" as UnitT, quantity: 0.1 },
+          { name: "ham", unit: "kg" as UnitT, quantity: 0.2 },
+          { name: "olive oil", unit: "kg" as UnitT, quantity: 0.1 },
         ],
       };
       // Act
@@ -66,9 +67,9 @@ describe("FoodProductService", () => {
       const foodProduct = {
         name: "Pizza",
         ingredients: [
-          { name: "flour", unit: "kg", quantity: 0.1 },
-          { name: "ham", unit: "kg", quantity: 0.2 },
-          { name: "olive oil", unit: "kg", quantity: 0.1 },
+          { name: "flour", unit: "kg" as UnitT, quantity: 0.1 },
+          { name: "ham", unit: "kg" as UnitT, quantity: 0.2 },
+          { name: "olive oil", unit: "kg" as UnitT, quantity: 0.1 },
         ],
       };
       await service.save(foodProduct);
@@ -84,17 +85,17 @@ describe("FoodProductService", () => {
         {
           name: "Pizza",
           ingredients: [
-            { name: "flour", unit: "kg", quantity: 0.1 },
-            { name: "ham", unit: "kg", quantity: 0.2 },
-            { name: "olive oil", unit: "kg", quantity: 0.1 },
+            { name: "flour", unit: "kg" as UnitT, quantity: 0.1 },
+            { name: "ham", unit: "kg" as UnitT, quantity: 0.2 },
+            { name: "olive oil", unit: "kg" as UnitT, quantity: 0.1 },
           ],
         },
         {
           name: "Pasta",
           ingredients: [
-            { name: "flour", unit: "kg", quantity: 0.2 },
-            { name: "ham", unit: "kg", quantity: 0.1 },
-            { name: "olive oil", unit: "kg", quantity: 0.1 },
+            { name: "flour", unit: "kg" as UnitT, quantity: 0.2 },
+            { name: "ham", unit: "kg" as UnitT, quantity: 0.1 },
+            { name: "olive oil", unit: "kg" as UnitT, quantity: 0.1 },
           ],
         },
       ];
@@ -122,17 +123,17 @@ describe("FoodProductService", () => {
         {
           name: "Pizza",
           ingredients: [
-            { name: "flour", unit: "kg", quantity: 0.1 },
-            { name: "ham", unit: "kg", quantity: 0.2 },
-            { name: "olive oil", unit: "kg", quantity: 0.1 },
+            { name: "flour", unit: "kg" as UnitT, quantity: 0.1 },
+            { name: "ham", unit: "kg" as UnitT, quantity: 0.2 },
+            { name: "olive oil", unit: "kg" as UnitT, quantity: 0.1 },
           ],
         },
         {
           name: "Pasta",
           ingredients: [
-            { name: "flour", unit: "kg", quantity: 0.2 },
-            { name: "ham", unit: "kg", quantity: 0.1 },
-            { name: "olive oil", unit: "kg", quantity: 0.1 },
+            { name: "flour", unit: "kg" as UnitT, quantity: 0.2 },
+            { name: "ham", unit: "kg" as UnitT, quantity: 0.1 },
+            { name: "olive oil", unit: "kg" as UnitT, quantity: 0.1 },
           ],
         },
       ];
@@ -153,9 +154,9 @@ describe("FoodProductService", () => {
       const foodProduct = {
         name: "Pizza",
         ingredients: [
-          { name: "flour", unit: "kg", quantity: 0.1 },
-          { name: "ham", unit: "kg", quantity: 0.2 },
-          { name: "olive oil", unit: "kg", quantity: 0.1 },
+          { name: "flour", unit: "kg" as UnitT, quantity: 0.1 },
+          { name: "ham", unit: "kg" as UnitT, quantity: 0.2 },
+          { name: "olive oil", unit: "kg" as UnitT, quantity: 0.1 },
         ],
       };
       await service.save(foodProduct);
@@ -173,17 +174,17 @@ describe("FoodProductService", () => {
         {
           name: "Pizza",
           ingredients: [
-            { name: "flour", unit: "kg", quantity: 0.1 },
-            { name: "ham", unit: "kg", quantity: 0.2 },
-            { name: "olive oil", unit: "kg", quantity: 0.1 },
+            { name: "flour", unit: "kg" as UnitT, quantity: 0.1 },
+            { name: "ham", unit: "kg" as UnitT, quantity: 0.2 },
+            { name: "olive oil", unit: "kg" as UnitT, quantity: 0.1 },
           ],
         },
         {
           name: "Pasta",
           ingredients: [
-            { name: "flour", unit: "kg", quantity: 0.2 },
-            { name: "ham", unit: "kg", quantity: 0.1 },
-            { name: "olive oil", unit: "kg", quantity: 0.1 },
+            { name: "flour", unit: "kg" as UnitT, quantity: 0.2 },
+            { name: "ham", unit: "kg" as UnitT, quantity: 0.1 },
+            { name: "olive oil", unit: "kg" as UnitT, quantity: 0.1 },
           ],
         },
       ];
@@ -221,17 +222,17 @@ describe("FoodProductService", () => {
         {
           name: "Pizza",
           ingredients: [
-            { name: "flour", unit: "kg", quantity: 0.1 },
-            { name: "ham", unit: "kg", quantity: 0.2 },
-            { name: "olive oil", unit: "kg", quantity: 0.1 },
+            { name: "flour", unit: "kg" as UnitT, quantity: 0.1 },
+            { name: "ham", unit: "kg" as UnitT, quantity: 0.2 },
+            { name: "olive oil", unit: "kg" as UnitT, quantity: 0.1 },
           ],
         },
         {
           name: "HamSalad",
           ingredients: [
-            { name: "lettuce", unit: "kg", quantity: 0.2 },
-            { name: "ham", unit: "kg", quantity: 0.1 },
-            { name: "olive oil", unit: "kg", quantity: 0.1 },
+            { name: "lettuce", unit: "kg" as UnitT, quantity: 0.2 },
+            { name: "ham", unit: "kg" as UnitT, quantity: 0.1 },
+            { name: "olive oil", unit: "kg" as UnitT, quantity: 0.1 },
           ],
         },
       ];
@@ -253,17 +254,17 @@ describe("FoodProductService", () => {
         {
           name: "Pizza",
           ingredients: [
-            { name: "flour", unit: "kg", quantity: 0.1 },
-            { name: "ham", unit: "kg", quantity: 0.2 },
-            { name: "olive oil", unit: "kg", quantity: 0.1 },
+            { name: "flour", unit: "kg" as UnitT, quantity: 0.1 },
+            { name: "ham", unit: "kg" as UnitT, quantity: 0.2 },
+            { name: "olive oil", unit: "kg" as UnitT, quantity: 0.1 },
           ],
         },
         {
           name: "Pasta",
           ingredients: [
-            { name: "flour", unit: "kg", quantity: 0.2 },
-            { name: "ham", unit: "kg", quantity: 0.1 },
-            { name: "olive oil", unit: "kg", quantity: 0.1 },
+            { name: "flour", unit: "kg" as UnitT, quantity: 0.2 },
+            { name: "ham", unit: "kg" as UnitT, quantity: 0.1 },
+            { name: "olive oil", unit: "kg" as UnitT, quantity: 0.1 },
           ],
         },
       ];
@@ -291,9 +292,9 @@ describe("FoodProductService", () => {
       const foodProduct = {
         name: "Pizza",
         ingredients: [
-          { name: "flour", unit: "kg", quantity: 0.1 },
-          { name: "ham", unit: "kg", quantity: 0.2 },
-          { name: "olive oil", unit: "kg", quantity: 0.1 },
+          { name: "flour", unit: "kg" as UnitT, quantity: 0.1 },
+          { name: "ham", unit: "kg" as UnitT, quantity: 0.2 },
+          { name: "olive oil", unit: "kg" as UnitT, quantity: 0.1 },
         ],
       };
       await service.save(foodProduct);

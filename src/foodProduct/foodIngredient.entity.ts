@@ -5,6 +5,7 @@ import {
   Index,
   PrimaryGeneratedColumn,
 } from "typeorm";
+import { UnitT } from "../measurementSystem/unit";
 
 /**
  * An ingredient has a name and a unit.
@@ -21,5 +22,5 @@ export class FoodIngredient extends BaseEntity {
   name: string;
 
   @Column({ type: "varchar", nullable: false })
-  unit: string;
+  unit: UnitT;
 }

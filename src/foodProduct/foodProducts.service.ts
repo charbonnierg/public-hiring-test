@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
+import { UnitT } from "../measurementSystem/unit";
 import { FoodIngredient } from "./foodIngredient.entity";
 import { FoodProduct } from "./foodProduct.entity";
 import { FoodProductIngredientQuantity } from "./foodProductIngredientQuantity.entity";
@@ -18,7 +19,7 @@ export class FoodProductsService implements IFoodProductsService {
   ) {}
   async save(props: {
     name: string;
-    ingredients: { name: string; unit: string; quantity: number }[];
+    ingredients: { name: string; unit: UnitT; quantity: number }[];
   }): Promise<FoodProduct> {
     // FIXME: Use a transaction
     const product = new FoodProduct();
