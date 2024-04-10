@@ -4,8 +4,10 @@ import { CarbonEmissionFactorsModule } from "../carbonEmissionFactor/carbonEmiss
 import { FoodProductsModule } from "../foodProduct/foodProducts.module";
 import { CarbonFootprintContribution } from "./carbonFootprintContribution.entity";
 import { CarbonFootprintController } from "./carbonFootprints.controller";
+import { CarbonFootprintRepository } from "./carbonFootprints.repository";
 import { CarbonFootprintService } from "./carbonFootprints.service";
 import { PendingCarbonFootprint } from "./pendingCarbonFootprint.entity";
+import { PendingCarbonFootprintRepository } from "./pendingCarbonFootprints.repository";
 import { PendingCarbonFootprintService } from "./pendingCarbonFootprints.service";
 import { PendingCarbonFootprintTimer } from "./pendingCarbonFootprints.timer";
 
@@ -19,7 +21,9 @@ import { PendingCarbonFootprintTimer } from "./pendingCarbonFootprints.timer";
     CarbonEmissionFactorsModule,
   ],
   providers: [
+    CarbonFootprintRepository,
     CarbonFootprintService,
+    PendingCarbonFootprintRepository,
     PendingCarbonFootprintService,
     PendingCarbonFootprintTimer,
   ],

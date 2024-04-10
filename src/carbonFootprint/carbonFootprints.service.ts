@@ -1,21 +1,21 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { In, Repository } from "typeorm";
 import { CarbonEmissionFactorsService } from "../carbonEmissionFactor/carbonEmissionFactors.service";
 import { ICarbonEmissionFactorService } from "../carbonEmissionFactor/interface/carbonEmissionFactors.service";
 import { FoodProductIngredientQuantity } from "../foodProduct/foodProductIngredientQuantity.entity";
 import { FoodProductsService } from "../foodProduct/foodProducts.service";
 import { IFoodProductsService } from "../foodProduct/interface/foodProducts.service";
 import { CarbonFootprintContribution } from "./carbonFootprintContribution.entity";
+import { CarbonFootprintRepository } from "./carbonFootprints.repository";
+import { ICarbonFootprintRepository } from "./interface/carbonFootprints.repository";
 import { ICarbonFootprintService } from "./interface/carbonFootprints.service";
 
 @Injectable()
 export class CarbonFootprintService implements ICarbonFootprintService {
   constructor(
-    @InjectRepository(CarbonFootprintContribution)
-    private footprintScoreRepository: Repository<CarbonFootprintContribution>,
     @Inject(FoodProductsService)
     private foodProductsService: IFoodProductsService,
+    @Inject(CarbonFootprintRepository)
+    private carbonFootprintRepository: ICarbonFootprintRepository,
     @Inject(CarbonEmissionFactorsService)
     private carbonEmissionFactorsService: ICarbonEmissionFactorService,
   ) {}
@@ -37,29 +37,22 @@ export class CarbonFootprintService implements ICarbonFootprintService {
   }
 
   async get(product: string): Promise<CarbonFootprintContribution[] | null> {
-    // Let's do this in two steps for now, we can always join the tables
-    // later if we need to.
+    // TODO: Do not query product first but use a single SQL query
+    // using product name.
+
+    // First find the product
     const entity = await this.foodProductsService.find({ name: product });
     if (!entity) {
       return null;
     }
-    // FIXME: No need to query ingredients a second time, we already have them
-    // in memory
-    const contributions = await this.footprintScoreRepository.find({
-      where: { quantity_id: In(entity.ingredients.map((i) => i.id)) },
-      relations: {
-        quantity: {
-          ingredient: true,
-        },
-      },
-    });
-    // Check to be sure
-    if (!contributions) {
-      return null;
-    }
+    // Then find the contributions for the product ingredients
+    const contributions =
+      await this.carbonFootprintRepository.findContributions(
+        entity.ingredients.map((i) => i.id),
+      );
+    // This should never happen, but let's be safe
     if (contributions.length !== entity.ingredients.length) {
-      // This should never happen, but let's be safe
-      return null;
+      throw new Error("Missing contributions for some ingredients");
     }
     return contributions;
   }
@@ -72,6 +65,7 @@ export class CarbonFootprintService implements ICarbonFootprintService {
     }
     // We can then get a list of ingredient names
     const ingredientNames = entity.ingredients.map((c) => c.ingredient.name);
+    const ingredientIds = entity.ingredients.map((i) => i.id);
     // And then query a list of factors
     const factors = await this.carbonEmissionFactorsService.findSetByNames({
       names: ingredientNames,
@@ -79,9 +73,7 @@ export class CarbonFootprintService implements ICarbonFootprintService {
     if (!factors) {
       // Make sure that we remove all contributions for the product
       // before returning null
-      await this.footprintScoreRepository.delete({
-        quantity_id: In(entity.ingredients.map((i) => i.id)),
-      });
+      await this.carbonFootprintRepository.deleteContributions(ingredientIds);
       return null;
     }
     // Let's rearrange the list of factors into a map
@@ -97,9 +89,7 @@ export class CarbonFootprintService implements ICarbonFootprintService {
     if (!scores) {
       // Make sure that we remove all contributions for the product
       // before returning null
-      await this.footprintScoreRepository.delete({
-        quantity_id: In(entity.ingredients.map((i) => i.id)),
-      });
+      await this.carbonFootprintRepository.deleteContributions(ingredientIds);
       return null;
     }
     // Finally let's build the array of contributions
@@ -115,7 +105,7 @@ export class CarbonFootprintService implements ICarbonFootprintService {
       return contribution;
     });
     // Save contributions in database
-    this.footprintScoreRepository.save(contributions);
+    this.carbonFootprintRepository.saveContributions(contributions);
     return contributions;
   }
 }
