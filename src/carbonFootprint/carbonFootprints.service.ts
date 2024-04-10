@@ -1,42 +1,71 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { CarbonEmissionFactorsService } from "../carbonEmissionFactor/carbonEmissionFactors.service";
 import { ICarbonEmissionFactorService } from "../carbonEmissionFactor/interface/carbonEmissionFactors.service";
-import { FoodProductIngredientQuantity } from "../foodProduct/foodProductIngredientQuantity.entity";
+import { FoodProduct } from "../foodProduct/foodProduct.entity";
 import { FoodProductsService } from "../foodProduct/foodProducts.service";
 import { IFoodProductsService } from "../foodProduct/interface/foodProducts.service";
 import { CarbonFootprintContribution } from "./carbonFootprintContribution.entity";
 import { CarbonFootprintRepository } from "./carbonFootprints.repository";
+import { computeFootprintForProductAndFactors } from "./carbonFootprints.score";
 import { ICarbonFootprintRepository } from "./interface/carbonFootprints.repository";
 import { ICarbonFootprintService } from "./interface/carbonFootprints.service";
 
+/**
+ * A service to compute the carbon footprint of a product
+ *
+ * This service is responsible for computing the carbon footprint of a product
+ * given the quantities of ingredients and their emission factors, and saving
+ * the contributions to the database.
+ */
 @Injectable()
 export class CarbonFootprintService implements ICarbonFootprintService {
   constructor(
     @Inject(FoodProductsService)
     private foodProductsService: IFoodProductsService,
-    @Inject(CarbonFootprintRepository)
-    private carbonFootprintRepository: ICarbonFootprintRepository,
     @Inject(CarbonEmissionFactorsService)
     private carbonEmissionFactorsService: ICarbonEmissionFactorService,
+    @Inject(CarbonFootprintRepository)
+    private carbonFootprintRepository: ICarbonFootprintRepository,
   ) {}
 
-  computeScore(
-    ingredients: FoodProductIngredientQuantity[],
-    factors: Record<string, number | undefined>,
-  ): Record<string, number> | null {
-    const scores = {} as Record<string, number>;
-    for (const item of ingredients) {
-      const factor = factors[item.ingredient.name];
-      if (!factor) {
-        return null;
-      }
-      const emissionCO2eInKg = item.quantity * factor;
-      scores[item.ingredient.name] = emissionCO2eInKg;
-    }
-    return scores;
+  /**
+   * Update the carbon footprint of a product
+   *
+   * This method will update the carbon footprint of a product by recomputing the
+   * contributions of the product to the carbon footprint based on the quantities
+   * of ingredients and their emission factors.
+   *
+   * @param product The name of the product to update the footprint for
+   * @returns The contributions of the product to the carbon footprint if found, null otherwise
+   */
+  async updateFootprintForProduct(
+    product: string,
+  ): Promise<CarbonFootprintContribution[] | null> {
+    // Let's start by finding the product
+    const entity = await this.foodProductsService.find({ name: product });
+    // If the product does not exist, we return null
+    if (!entity) return null;
+    // And then query a list of factors
+    const factors = await this.carbonEmissionFactorsService.findSetByNames({
+      names: entity.ingredients.map((c) => c.ingredient.name),
+    });
+    // If factors are missing, we clear the contributions and return null
+    if (!factors) return await this.clearContributionsForProduct(entity);
+    // Let's build the array of contributions
+    const contributions = computeFootprintForProductAndFactors(entity, factors);
+    // If contributions are missing, we clear the contributions and return null
+    return contributions || (await this.clearContributionsForProduct(entity));
   }
 
-  async get(product: string): Promise<CarbonFootprintContribution[] | null> {
+  /**
+   * Get the carbon footprint of a product
+   *
+   * @param product The name of the product to get the footprint for
+   * @returns The contributions of the product to the carbon footprint if found, null otherwise
+   */
+  async getFootprintForProduct(
+    product: string,
+  ): Promise<CarbonFootprintContribution[] | null> {
     // TODO: Do not query product first but use a single SQL query
     // using product name.
 
@@ -57,55 +86,18 @@ export class CarbonFootprintService implements ICarbonFootprintService {
     return contributions;
   }
 
-  async save(product: string): Promise<CarbonFootprintContribution[] | null> {
-    // Let's start by finding the product
-    const entity = await this.foodProductsService.find({ name: product });
-    if (!entity) {
-      return null;
-    }
-    // We can then get a list of ingredient names
-    const ingredientNames = entity.ingredients.map((c) => c.ingredient.name);
-    const ingredientIds = entity.ingredients.map((i) => i.id);
-    // And then query a list of factors
-    const factors = await this.carbonEmissionFactorsService.findSetByNames({
-      names: ingredientNames,
-    });
-    if (!factors) {
-      // Make sure that we remove all contributions for the product
-      // before returning null
-      await this.carbonFootprintRepository.deleteContributions(ingredientIds);
-      return null;
-    }
-    // Let's rearrange the list of factors into a map
-    const factorsMap = Object.fromEntries(factors.map((f) => [f.name, f]));
-    const emissionsPerUnit = Object.fromEntries(
-      factors.map((f) => [f.name, f.emissionCO2eInKgPerUnit]),
+  /**
+   * Clear the contributions for a product. This is a private method used by the service itself.
+   *
+   * @param product The product to clear the contributions for
+   * @returns A promise that resolves to null (useful to return early in async functions)
+   */
+  private async clearContributionsForProduct(
+    product: FoodProduct,
+  ): Promise<null> {
+    await this.carbonFootprintRepository.deleteContributions(
+      product.ingredients.map((i) => i.id),
     );
-    const scores = this.computeScore(entity.ingredients, emissionsPerUnit);
-    // Let's rearrange the list of ingredients into a map
-    const quantities = Object.fromEntries(
-      entity.ingredients.map((c) => [c.ingredient.name, c]),
-    );
-    if (!scores) {
-      // Make sure that we remove all contributions for the product
-      // before returning null
-      await this.carbonFootprintRepository.deleteContributions(ingredientIds);
-      return null;
-    }
-    // Finally let's build the array of contributions
-    const contributions = Object.entries(scores).map(([ingredient, score]) => {
-      const quantity = quantities[ingredient];
-      const factor = factorsMap[ingredient];
-      const contribution = new CarbonFootprintContribution();
-      contribution.score = score;
-      contribution.quantity = quantity;
-      contribution.factor = factor;
-      contribution.factor_id = factor.id;
-      contribution.quantity_id = quantity.id;
-      return contribution;
-    });
-    // Save contributions in database
-    this.carbonFootprintRepository.saveContributions(contributions);
-    return contributions;
+    return null;
   }
 }

@@ -6,7 +6,9 @@ export interface ICarbonFootprintService {
    *
    * @param product The name of the product for which to get the footprint score
    */
-  get(product: string): Promise<CarbonFootprintContribution[] | null>;
+  getFootprintForProduct(
+    product: string,
+  ): Promise<CarbonFootprintContribution[] | null>;
 
   /**
    * Update the footprint score contributions for a product.
@@ -17,5 +19,7 @@ export interface ICarbonFootprintService {
    *
    * @param product The name of the product for which to update the footprint score
    */
-  save(product: string): Promise<CarbonFootprintContribution[] | null>;
+  updateFootprintForProduct(
+    product: string,
+  ): Promise<CarbonFootprintContribution[] | null>;
 }

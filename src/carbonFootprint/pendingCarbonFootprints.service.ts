@@ -39,9 +39,10 @@ export class PendingCarbonFootprintService
         );
         // And save them
         for (const product of products) {
-          const contributions = await this.carbonFootprintService.save(
-            product.name,
-          );
+          const contributions =
+            await this.carbonFootprintService.updateFootprintForProduct(
+              product.name,
+            );
           updated[product.name] = contributions;
           await this.pendingCarbonFootprintRepository.deletePendingCarbonFootprints(
             [pending.id],
@@ -49,9 +50,10 @@ export class PendingCarbonFootprintService
         }
       } else {
         // If it's a product, we need to save it
-        const contributions = await this.carbonFootprintService.save(
-          pending.product.name,
-        );
+        const contributions =
+          await this.carbonFootprintService.updateFootprintForProduct(
+            pending.product.name,
+          );
         updated[pending.product.name] = contributions;
         await this.pendingCarbonFootprintRepository.deletePendingCarbonFootprints(
           [pending.id],

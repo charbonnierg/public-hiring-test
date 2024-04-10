@@ -38,7 +38,8 @@ export class CarbonFootprintController {
     @Param("product") product: string,
   ): Promise<ReadCarbonFootprintDto> {
     this.logger.log(`[GET /${product}] reading footprint score for ${product}`);
-    const contributions = await this.carbonFootprintService.get(product);
+    const contributions =
+      await this.carbonFootprintService.getFootprintForProduct(product);
     if (!contributions) {
       this.logger.warn(
         `[GET /${product}] footprint score for ${product} not found`,
@@ -71,7 +72,8 @@ export class CarbonFootprintController {
     this.logger.log(
       `[POST /${product}] updating footprint score for ${product}`,
     );
-    const contributions = await this.carbonFootprintService.save(product);
+    const contributions =
+      await this.carbonFootprintService.updateFootprintForProduct(product);
     if (!contributions) {
       this.logger.warn(
         `[POST /${product}] footprint score for ${product} not found`,
