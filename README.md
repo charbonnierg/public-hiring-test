@@ -10,7 +10,7 @@ Stack: NestJs + TypeORM + Postgres
 ## Installation
 
 ```bash
-$ yarn
+$ npm i
 ```
 
 ## Running the app
@@ -18,17 +18,17 @@ $ yarn
 First you need to start, migrate and seed the db :
 
 ```bash
-$ yarn init-project
+$ npm run init-project
 ```
 
 you can then start the server:
 
 ```bash
 # development
-$ yarn start
+$ npm run start
 
 # watch mode
-$ yarn start:dev
+$ npm run start:dev
 ```
 
 ## Test
@@ -37,13 +37,16 @@ To run unit tests:
 
 ```bash
 # unit tests
-$ yarn test
+$ npm run test
 
 # e2e tests
-$ yarn test:e2e
+$ npm run test:e2e
 
-# test coverage
-$ yarn test:cov
+# test coverage (unit tests only)
+$ npm run test:cov
+
+# test coverage (unit tests and e2e tests)
+$ npm run test:covall
 ```
 
 ## Database Migration
@@ -51,7 +54,7 @@ $ yarn test:cov
 When the data schema is updated, the database needs to be synchronised with the code. This is done by creating a migration with Typeorm using the following command:
 
 ```bash
-migrationName=<name> yarn migration:generate
+migrationName=<name> npm run migration:generate
 ```
 
 # Hiring Test

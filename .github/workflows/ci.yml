@@ -11,9 +11,28 @@ env:
   DATABASE_USERNAME: user
   DATABASE_PASSWORD: pwd
   DATABASE_NAME: database
+  NODE_VERSION: 18.x
 
 jobs:
-  test:
+  sbom:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Generate SBOM with npm run sbom
+        run: npm run sbom
+
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom
+          path: sbom.json
+
+  validation:
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -32,22 +51,38 @@ jobs:
           - 5432:5432
     steps:
       - uses: actions/checkout@v4
+
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "18.x"
-      - run: yarn --frozen-lockfile
-      - run: yarn format:check
-      - run: yarn lint:check
-      - run: yarn test:covall --verbose
-      - run: yarn html-coverage
-      - run: yarn docs:build
-      - name: Archive code coverage results
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install project
+        run: npm ci
+
+      - name: Run formatter (prettier)
+        run: npm run format:check
+
+      - name: Run linter (eslint)
+        run: npm run lint:check
+
+      - name: Run tests
+        run: npm run test:covall --verbose
+
+      - name: Generate html coverage report
+        run: npm run html-coverage
+
+      - name: Generate compodoc documentation
+        run: npm run docs:build
+
+      - name: Upload html coverage report
         uses: actions/upload-artifact@v4
         with:
           name: code-coverage-report
           path: coverage/html
-      - name: Archive documentation
+
+      - name: Upload compodoc documentation
         uses: actions/upload-artifact@v4
         with:
           name: documentation

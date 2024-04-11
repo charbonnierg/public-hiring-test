@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "init-project": "yarn build && yarn start-docker && yarn migration:run && yarn seed",
+    "init-project": "npm run build && npm run start-docker && npm run migration:run && npm run seed",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
@@ -24,12 +24,13 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "NODE_ENV=test jest --config ./test-e2e/jest-e2e.json --runInBand",
     "typeorm": "ts-node ./node_modules/typeorm/cli -d ./config/dataSource.ts",
-    "migration:run": "yarn build && yarn typeorm migration:run",
-    "migration:generate": "yarn build && yarn typeorm -- migration:generate ./migrations/$migrationName",
+    "migration:run": "npm run build && npm run typeorm migration:run",
+    "migration:generate": "npm run build && npm run typeorm -- migration:generate ./migrations/$migrationName",
     "seed": "ts-node ./src/seed-dev.ts",
     "docs": "npx @compodoc/compodoc -p tsconfig.compodoc.json -s",
     "docs:build": "npx @compodoc/compodoc -p tsconfig.compodoc.json",
-    "html-coverage": "npx nyc report -t coverage --report-dir coverage/html --reporter=html"
+    "html-coverage": "npx nyc report -t coverage --report-dir coverage/html --reporter=html",
+    "sbom": "npx @cyclonedx/cyclonedx-npm package.json --output-format JSON --output-file sbom.json"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",

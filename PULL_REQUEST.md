@@ -13,10 +13,10 @@ As a reminder, this PR aimed at solving the following exercice:
 
 ## Checklist
 
-- [x] I have installed the project with `yarn`.
-- [x] I have bootstrapped the project with `yarn init-project`. 
-- [x] I have successfully run the project tests with `yarn test`
-- [x] I have successfully run the project e2e tests with `yarn test:e2e`
+- [x] I have installed the project with `npm ci`.
+- [x] I have bootstrapped the project with `npm run init-project`. 
+- [x] I have successfully run the project tests with `npm run test`
+- [x] I have successfully run the project e2e tests with `npm run test:e2e`
 
 ## Proposed Changes
 
@@ -389,7 +389,7 @@ With this, the system would be more robust and would handle errors more graceful
 
 - [x] `CarbonFootprintModule` to handle the carbon footprint calculation and storage.
 
-Run `yarn docs` and open the `http://localhost:8080` to see the documentation for each module.
+Run `npm run docs` and open the `http://localhost:8080` to see the documentation for each module.
 
 ## About testing
 

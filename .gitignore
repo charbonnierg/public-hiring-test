@@ -8,3 +8,5 @@ src/coverage
 /documentation
 /coverage
 .nyc_output
+sbom.json
+
