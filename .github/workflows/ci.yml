@@ -23,7 +23,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install project
         run: npm ci
@@ -37,7 +37,48 @@ jobs:
           name: sbom
           path: sbom.json
 
-  validation:
+  linting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Install project
+        run: npm ci
+
+      - name: Run formatter (prettier)
+        run: npm run format:check
+
+      - name: Run linter (eslint)
+        run: npm run lint:check
+
+  documentation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Install project
+        run: npm ci
+
+      - name: Generate compodoc documentation
+        run: npm run docs:build
+
+      - name: Upload compodoc documentation
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation
+          path: documentation
+
+  tests:
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -61,16 +102,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install project
         run: npm ci
-
-      - name: Run formatter (prettier)
-        run: npm run format:check
-
-      - name: Run linter (eslint)
-        run: npm run lint:check
 
       - name: Run tests
         run: npm run test:covall --verbose
@@ -78,17 +113,8 @@ jobs:
       - name: Generate html coverage report
         run: npm run html-coverage
 
-      - name: Generate compodoc documentation
-        run: npm run docs:build
-
       - name: Upload html coverage report
         uses: actions/upload-artifact@v4
         with:
           name: code-coverage-report
           path: coverage/html
-
-      - name: Upload compodoc documentation
-        uses: actions/upload-artifact@v4
-        with:
-          name: documentation
-          path: documentation
