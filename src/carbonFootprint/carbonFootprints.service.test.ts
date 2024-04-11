@@ -17,12 +17,10 @@ import {
   InMemoryCarbonFootprintRepository,
 } from "./carbonFootprints.repository";
 import { CarbonFootprintService } from "./carbonFootprints.service";
-import { ICarbonFootprintRepository } from "./interface/carbonFootprints.repository";
 import { ICarbonFootprintService } from "./interface/carbonFootprints.service";
 
 describe("CarbonFootprint.Service", () => {
   let module: TestingModule;
-  let repository: ICarbonFootprintRepository;
   let service: ICarbonFootprintService;
   let carbonEmissionService: ICarbonEmissionFactorService;
   let foodProductService: IFoodProductsService;
@@ -53,9 +51,6 @@ describe("CarbonFootprint.Service", () => {
       CarbonEmissionFactorsService,
     );
     foodProductService = module.get<IFoodProductsService>(FoodProductsService);
-    repository = module.get<ICarbonFootprintRepository>(
-      CarbonFootprintRepository,
-    );
     service = module.get<ICarbonFootprintService>(CarbonFootprintService);
   });
   describe("getFootprintForProduct", () => {
