@@ -2,9 +2,10 @@ import { CarbonFootprintContribution } from "../carbonFootprintContribution.enti
 
 export interface ICarbonFootprintService {
   /**
-   * Get the footprint score contributins for a product.
+   * Get the footprint score contributions for a product.
    *
    * @param product The name of the product for which to get the footprint score
+   * @returns The footprint score contributions for the product or null if the footprint is not available
    */
   getFootprintForProduct(
     product: string,

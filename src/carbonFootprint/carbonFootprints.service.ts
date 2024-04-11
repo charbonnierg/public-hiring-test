@@ -73,7 +73,12 @@ export class CarbonFootprintService implements ICarbonFootprintService {
   async getFootprintForProduct(
     product: string,
   ): Promise<CarbonFootprintContribution[] | null> {
-    return this.carbonFootprintRepository.findContributions(product);
+    const contributions =
+      await this.carbonFootprintRepository.findContributions(product);
+    if (contributions.length === 0) {
+      return null;
+    }
+    return contributions;
   }
 
   /**
