@@ -52,6 +52,31 @@ Some of the changes are breaking changes and will require changes in the client 
   - This will allow developers to have their own settings without having to worry about conflicts.
   - IMO developers should be able to control their `settings.json` file, while having sane defaults in `settings.default.json`.
 
+#### Edit (2024-04-11)
+
+- 🧹 Add a `sbom` script to generate Software Bill Of Material according to `package.json`
+
+- 🧹 Add a `format:check` script to check formatting in CI.
+
+- 🧹 Add a `lint:check` script to check linting in CI.
+
+- 🚨 Removed `yarn` in favor of `npm`
+
+##### About `yarn` vs `npm`
+
+Disclaimer: I really did not want to make this change, as I think that developers should stick to the technology in place unless there is a very good reason to change. After considerations, I think that in this case, the change is justified.
+
+Many projects now require the generation of a [Software Bill Of Material](https://en.wikipedia.org/wiki/Software_supply_chain) (SBOM) to comply with regulations or to provide transparency to the users.
+
+Unless paying subscriptions to companies such as `Snyk` or `WhiteSource`, generating a SBOM is not as easy with `yarn` as it is with `npm`.
+
+For example, [CycloneDx](https://cyclonedx.org/) provides a tool for npm projects but not for Yarn projects (tool for yarn is being developed, and only supports version 4).
+
+As much as I think that developers should comply with regulations and provide transparency to the users, I think that developers should not invest too much efforts in such activities.
+
+Switching from `yarn` to `npm` enables SBOM generation without any effort thanks to [cyclonedx-npm](https://www.npmjs.com/package/%40cyclonedx/cyclonedx-npm).
+
+
 ### `CarbonEmissionFactor` module
 
 - ✅ Export the `CarbonEmissionFactorService` class from the `CarbonEmissionFactor` module:
