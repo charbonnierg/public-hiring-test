@@ -41,8 +41,14 @@ jobs:
       - run: yarn lint:check
       - run: yarn test:covall --verbose
       - run: yarn html-coverage
+      - run: yarn docs:build
       - name: Archive code coverage results
         uses: actions/upload-artifact@v4
         with:
           name: code-coverage-report
           path: coverage/html
+      - name: Archive documentation
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation
+          path: documentation
